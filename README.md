@@ -10,6 +10,8 @@ python3 run.py
 
 Open the printed `http://127.0.0.1:.../` URL if the browser does not open. Stop the local server with Ctrl+C. `python3 -m camwright --no-browser --port 8000` chooses an explicit port. The default chooses a free port.
 
+![Camwright workspace with the synthetic 20 mm motion cycle](docs/workspace.jpg)
+
 To install locally:
 
 ```sh
