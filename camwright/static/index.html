@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Camwright</title><link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/styles.css"></head>
+<body>
+<header><strong>Camwright</strong><span>In-line radial roller cam · 3-4-5 motion</span></header>
+<main>
+<div class="toolbar"><h1>Cam profile</h1><div class="actions"><button id="undo" disabled>Undo</button><button id="open">Open project</button><button id="save">Save project</button><button id="example">Example</button></div></div>
+<p id="notice" role="status" aria-live="polite" hidden></p>
+<div class="workspace">
+<section class="inputs" aria-labelledby="dimensions-heading">
+<h2 id="dimensions-heading">Dimensions and limits</h2>
+<div class="dimensions">
+<label>Base radius (mm)<input id="base" type="text" inputmode="decimal" maxlength="32"></label>
+<label>Roller radius (mm)<input id="roller" type="text" inputmode="decimal" maxlength="32"></label>
+<label>Maximum pressure slope<input id="slope" type="text" inputmode="decimal" maxlength="32"><span id="angle-equivalent" class="hint">Exact slope; approximate angle shown after checking.</span></label>
+<label>Export deviation (mm)<input id="tolerance" type="text" inputmode="decimal" maxlength="32"><span class="hint">Maximum continuous-curve deviation.</span></label>
+</div>
+<h2>Motion cycle</h2>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Motion segments. Scroll horizontally on narrow screens."><table><thead><tr><th>Segment</th><th>Span (°)</th><th>End lift (mm)</th><th>Start (°)</th><th>Motion</th><th><span class="sr-only">Reorder or remove</span></th></tr></thead><tbody id="segments"></tbody></table></div>
+<div class="motion-actions"><button id="add">Add segment</button><span id="cycle-total" class="hint"></span></div>
+<p class="hint">Positive spans, exactly 360°, final lift 0 mm. Fixed-decimal inputs; no scientific notation.</p>
+<div class="check-actions"><button id="check" class="primary">Check geometry</button><button id="export" disabled>Export profile ZIP</button></div>
+</section>
+<section class="drawing" aria-labelledby="drawing-heading">
+<div class="plot-heading"><h2 id="drawing-heading">Profile</h2><span class="hint">mm · +X at 0° · counterclockwise</span></div>
+<div class="profile-state"><strong id="profile-status">Not checked</strong><button id="profile-witness" hidden></button></div>
+<div class="legend"><span><i class="solid"></i>Physical cam</span><span><i class="dashed"></i>Pitch curve / roller center</span></div>
+<svg id="profile" viewBox="0 0 520 420" role="img" aria-label="Physical cam and pitch curve profile"><text x="260" y="210" text-anchor="middle">Check geometry to draw the profile.</text></svg>
+<div class="plot-heading"><h2>Displacement</h2><span class="hint">Lift (mm) / angle (°)</span></div>
+<svg id="displacement" viewBox="0 0 520 190" role="img" aria-label="Follower displacement versus angle"></svg>
+<label class="cursor-label">Angle cursor (°)<input id="cursor" type="range" min="0" max="360" step="1" value="0" disabled><output id="cursor-angle">0°</output></label>
+<div id="cursor-values" class="cursor-values"></div>
+<p class="hint">Pitch follows the roller center; the physical cam is offset by the roller radius along the normal. Preview lines are visual samples.</p>
+</section>
+</div>
+<section id="results" class="results" aria-labelledby="results-heading"><div class="result-title"><h2 id="results-heading">Geometric checks</h2><strong id="overall">Not checked</strong><span id="stale" hidden>Inputs changed · previous result</span></div><div id="check-details">Check the current motion cycle and dimensions.</div><p id="export-status" hidden></p></section>
+<footer>Geometric model only. Dynamics, stress, tool compensation and manufacturing fit are outside this check.</footer>
+</main>
+<input id="file" type="file" accept=".json,application/json" hidden>
+<script type="module" src="/app.js"></script>
+</body></html>

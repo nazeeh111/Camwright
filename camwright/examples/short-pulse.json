@@ -1,0 +1,33 @@
+{
+  "schema": "camwright.project",
+  "version": 1,
+  "units": "mm",
+  "angle_units": "degrees",
+  "model": "inline-roller-345-convex",
+  "base_radius": "25",
+  "roller_radius": "5",
+  "maximum_pressure_slope": "0.5",
+  "segments": [
+    {
+      "span_deg": "0.1",
+      "end_mm": "0"
+    },
+    {
+      "span_deg": "3",
+      "end_mm": "0.01"
+    },
+    {
+      "span_deg": "0.1",
+      "end_mm": "0.01"
+    },
+    {
+      "span_deg": "3",
+      "end_mm": "0"
+    },
+    {
+      "span_deg": "353.8",
+      "end_mm": "0"
+    }
+  ],
+  "tolerance_mm": "0.001"
+}
