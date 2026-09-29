@@ -1,6 +1,16 @@
-# Camwright
+<p align="center"><img src="docs/mark.svg" width="96" height="96" alt="Camwright cam profile and roller" /></p>
 
-Design an in-line roller cam from a rise/dwell/return table, check its continuous geometry, and export the physical profile with a stated approximation tolerance. Runs locally with Python and its standard library. No account or network service is used.
+<h1 align="center">Camwright</h1>
+
+<p align="center">Design an in-line roller cam, check its continuous geometry, and export the profile with bounded approximation error.</p>
+
+<p align="center"><a href="#run-locally">Run locally</a> · <a href="https://github.com/nazeeh111/Camwright/releases/tag/v0.1.0">Download v0.1.0</a></p>
+
+![Camwright workspace with the synthetic 20 mm motion cycle](docs/workspace.jpg)
+
+## Run locally
+
+Runs locally with Python and its standard library. No account or network service is used.
 
 From a source checkout, with Python 3.12 or newer:
 
@@ -9,8 +19,6 @@ python3 run.py
 ```
 
 Open the printed `http://127.0.0.1:.../` URL if the browser does not open. Stop the local server with Ctrl+C. `python3 -m camwright --no-browser --port 8000` chooses an explicit port. The default chooses a free port.
-
-![Camwright workspace with the synthetic 20 mm motion cycle](docs/workspace.jpg)
 
 To install locally:
 
