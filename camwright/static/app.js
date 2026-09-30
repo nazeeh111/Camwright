@@ -37,6 +37,7 @@ function remember() {
 }
 function changed() {
   revision++; dirty=true;if(checked){$('stale').textContent='Inputs changed · previous result';$('stale').hidden=false;}
+  $('check-announcement').textContent='';
   $('profile-status').textContent=checked?`Stale · previous ${states[checked.result.status]}`:'Not checked';$('profile-status').className='unknown';$('profile-witness').hidden=true;
   $('export').disabled=true; $('export-status').hidden=true;
   updateInspectionButton();
@@ -47,7 +48,14 @@ function changed() {
   $('angle-equivalent').textContent='Exact slope; approximate angle shown after checking.';
   notice('');
 }
-function edit(mutator) { remember(); mutator(); focusSnapshot=null; changed(); renderInputs(); }
+function edit(mutator, focusTarget) {
+  remember(); mutator(); focusSnapshot=null; changed(); renderInputs();
+  if(focusTarget){
+    const row=$('segments').children[Math.min(focusTarget.index,project.segments.length-1)];
+    const preferred=row?.querySelector(`[data-control="${focusTarget.control}"]`);
+    (preferred&&!preferred.disabled?preferred:row?.querySelector('input'))?.focus();
+  }
+}
 function bindInput(input,mutator) {
   input.addEventListener('focus',()=>{focusSnapshot={input,project:copy(project),recorded:false};});
   input.addEventListener('input',()=>{
@@ -64,11 +72,12 @@ function renderInputs() {
     const end=element('input',{type:'text',inputmode:'decimal',maxlength:'32','aria-label':`Segment ${i+1} end lift in millimetres`});end.value=row.end_mm;bindInput(end,v=>project.segments[i].end_mm=v);
     const controls=element('div',{class:'row-actions'});
     for(const [text,label,delta] of [['↑','Move segment up',-1],['↓','Move segment down',1]]){
-      const b=element('button',{'aria-label':`${label}: segment ${i+1}`,title:label},text);b.disabled=i+delta<0||i+delta>=project.segments.length;
-      b.addEventListener('click',()=>edit(()=>{[project.segments[i],project.segments[i+delta]]=[project.segments[i+delta],project.segments[i]];}));controls.append(b);
+      const control=delta<0?'move-up':'move-down';
+      const b=element('button',{'aria-label':`${label}: segment ${i+1}`,title:label,'data-control':control},text);b.disabled=i+delta<0||i+delta>=project.segments.length;
+      b.addEventListener('click',()=>edit(()=>{[project.segments[i],project.segments[i+delta]]=[project.segments[i+delta],project.segments[i]];},{index:i+delta,control}));controls.append(b);
     }
-    const remove=element('button',{'aria-label':`Remove segment ${i+1}`,title:'Remove segment'},'×');remove.disabled=project.segments.length<=1;
-    remove.addEventListener('click',()=>edit(()=>project.segments.splice(i,1)));controls.append(remove);
+    const remove=element('button',{'aria-label':`Remove segment ${i+1}`,title:'Remove segment','data-control':'remove'},'×');remove.disabled=project.segments.length<=1;
+    remove.addEventListener('click',()=>edit(()=>project.segments.splice(i,1),{index:i,control:'remove'}));controls.append(remove);
     const d=derived[i];
     $('segments').append(element('tr',{},element('td',{},String(i+1)),element('td',{},span),element('td',{},end),element('td',{class:'derived-start'},d?.start_deg_exact??'—'),element('td',{class:'derived-motion'},d?.motion??d?.kind??'—'),element('td',{},controls)));
   });
@@ -82,32 +91,63 @@ function showDerived(data) {
 function replaceProject(next,data,saved=false) {
   if(project)remember();project=copy(next);derived=data?.segments||[];revision++;checked=null;dirty=!saved;focusSnapshot=null;
   renderInputs();showDerived(data);for(const id of ['base','roller','slope','tolerance','save','example'])$(id).disabled=false;$('check').disabled=checkBusy;$('undo').disabled=!history.length;$('overall').textContent='Not checked';$('overall').className='';$('profile-status').textContent='Not checked';$('profile-status').className='';$('profile-witness').hidden=true;$('stale').hidden=true;
+  $('check-announcement').textContent='';
   $('check-details').textContent='Check the current motion cycle and dimensions.';$('export').disabled=true;$('cursor').disabled=true;$('cursor').value=0;$('cursor-angle').value='0°';
   updateInspectionButton();
   $('angle-equivalent').textContent='Exact slope; approximate angle shown after checking.';$('cursor-values').replaceChildren();$('profile').replaceChildren(svg('text',{x:260,y:210,'text-anchor':'middle'}));$('profile').firstChild.textContent='Check geometry to draw the profile.';$('displacement').replaceChildren();$('export-status').hidden=true;
 }
 function approximate(value){const parts=String(value).split('/');return Number(parts[0])/(parts.length>1?Number(parts[1]):1);}
-function resultCards(result) {
+function witnessText(item) {
+  return item.angle_deg!==undefined?`Witness ${item.angle_deg}°`:item.angle_interval_deg?`Interval ${item.angle_interval_deg.join('–')}°`:'Unresolved interval';
+}
+function witnessLabel(key, segment, item) {
+  return `${labels[key]} · segment ${segment+1} · ${witnessText(item)}`;
+}
+function showWitness(item) {
+  if(checkBusy||!checked||checked.revision!==revision)return;
+  const angle=item.angle_deg??item.angle_interval_deg?.[0];
+  if(angle===undefined)return;
+  setCursor(approximate(angle));
+  $('cursor').focus({preventScroll:true});
+  $('drawing-heading').scrollIntoView({block:'start',behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+}
+function announceResult(result) {
+  const checks=result.segments.flatMap(segment=>Object.values(segment.checks));
+  const failed=checks.filter(item=>item.status==='fail').length;
+  const unresolved=checks.filter(item=>item.status==='unknown').length;
+  const outcome=result.status==='pass'?`All ${checks.length} checks passed.`:`${failed} failed checks; ${unresolved} unresolved checks.`;
+  $('check-announcement').textContent=`Geometry check complete: ${states[result.status]||'Unresolved'}. ${outcome} ${result.segments.length} motion segments. ${result.status==='pass'?'Profile export can now be requested.':'Profile export unavailable.'}`;
+}
+function renderResults(result) {
   $('overall').textContent=states[result.status]||'Unresolved';$('overall').className=result.status;
   $('profile-status').textContent=`${states[result.status]||'Unresolved'} · geometry`;$('profile-status').className=result.status;
   const issue=result.segments.flatMap(s=>Object.entries(s.checks).map(([key,item])=>({key,item,segment:s.segment}))).find(x=>x.item.status===result.status&&x.item.status!=='pass');
-  $('profile-witness').hidden=!issue;if(issue){const a=issue.item.angle_deg??issue.item.angle_interval_deg?.[0];$('profile-witness').textContent=`${labels[issue.key]} · segment ${issue.segment+1} · ${issue.item.angle_deg!==undefined?'witness':'interval'} ${issue.item.angle_deg??issue.item.angle_interval_deg?.join('–')??''}°`;$('profile-witness').onclick=()=>{if(a!==undefined)setCursor(approximate(a));$('cursor').scrollIntoView({block:'center',behavior:'smooth'});};}
+  $('profile-witness').hidden=!issue;if(issue){$('profile-witness').textContent=witnessLabel(issue.key,issue.segment,issue.item);$('profile-witness').setAttribute('aria-label',witnessLabel(issue.key,issue.segment,issue.item));$('profile-witness').disabled=(issue.item.angle_deg??issue.item.angle_interval_deg?.[0])===undefined;$('profile-witness').onclick=()=>showWitness(issue.item);}
   $('check-details').replaceChildren();
-  for(const [key,label] of Object.entries(labels)){
-    const card=element('div',{class:'check-card'},element('h3',{},label));
-    for(const segment of result.segments){
-      const item=segment.checks[key], state=states[item.status]||'Unresolved';
-      const row=element('div',{class:'check-row'},element('span',{},`Segment ${segment.segment+1}`),element('strong',{class:item.status},state));card.append(row);
-      if(item.status==='pass')card.append(element('p',{class:'hint'},`Continuous interval check · ${item.boxes} intervals examined.`));
+  const header=()=>element('thead',{},element('tr',{},element('th',{scope:'col'},'Segment'),...Object.values(labels).map(label=>element('th',{scope:'col'},label))));
+  const body=element('tbody'), evidenceBody=element('tbody');
+  const table=element('table',{class:'check-matrix'},header(),body);
+  const evidenceTable=element('table',{class:'check-evidence'},header(),evidenceBody);
+  for(const segment of result.segments){
+    const row=element('tr',{},element('th',{scope:'row'},`Segment ${segment.segment+1}`));
+    const evidenceRow=element('tr',{},element('th',{scope:'row'},`Segment ${segment.segment+1}`));
+    for(const key of Object.keys(labels)){
+      const item=segment.checks[key];
+      const cell=element('td',{},element('strong',{class:item.status},states[item.status]||'Unresolved'));
       if(item.status!=='pass'){
         const angle=item.angle_deg??item.angle_interval_deg?.[0];
-        const text=item.angle_deg!==undefined?`Witness ${item.angle_deg}°`:item.angle_interval_deg?`Interval ${item.angle_interval_deg.join('–')}°`:'Unresolved interval';
-        const b=element('button',{},text);b.disabled=angle===undefined;b.addEventListener('click',()=>setCursor(approximate(angle)));card.append(b);
-        const reason=(item.reason==='work_or_depth_limit'?'Subdivision work or depth limit reached.':item.reason)||(item.status==='fail'?'The geometric condition fails.':'Subdivision work or depth limit reached.');card.append(element('p',{class:'hint'},`${reason} Work: ${item.boxes}.`));
+        const button=element('button',{'aria-label':witnessLabel(key,segment.segment,item)},witnessText(item));
+        button.disabled=angle===undefined;button.addEventListener('click',()=>showWitness(item));cell.append(button);
+        const reason=(item.reason==='work_or_depth_limit'?'Subdivision work or depth limit reached.':item.reason)||(item.status==='fail'?'The geometric condition fails.':'Subdivision work or depth limit reached.');cell.append(element('p',{class:'hint'},`${reason} Work: ${item.boxes}.`));
       }
+      row.append(cell);
+      evidenceRow.append(element('td',{},`${states[item.status]||'Unresolved'} · ${item.boxes} intervals examined`));
     }
-    $('check-details').append(card);
+    body.append(row);evidenceBody.append(evidenceRow);
   }
+  const scroll=element('div',{class:'table-scroll',tabindex:'0',role:'region','aria-label':'Geometric checks by motion segment. Scroll horizontally on narrow screens.'},table);
+  const evidence=element('details',{class:'result-evidence'},element('summary',{},'Continuous-check evidence'),element('p',{class:'hint'},'Subdivision intervals examined for each continuous-angle check. Saved inspections retain the exact inputs and certificates.'),element('div',{class:'table-scroll',tabindex:'0',role:'region','aria-label':'Continuous-check subdivision counts. Scroll horizontally on narrow screens.'},evidenceTable));
+  $('check-details').append(scroll,evidence);
 }
 let plotMap;
 function drawPreview(preview) {
@@ -144,13 +184,15 @@ function download(blob,name){const url=URL.createObjectURL(blob),a=element('a',{
 async function validate(raw) {return(await request('/api/validate',{project},raw)).json();}
 $('check').addEventListener('click',async()=>{
   if(checkBusy)return;const current=copy(project),expected=revision;checkBusy=true;$('check').disabled=true;$('check').textContent='Checking…';$('export').disabled=true;notice('');$('profile-status').textContent='Checking geometry…';$('profile-status').className='unknown';$('profile-witness').hidden=true;if(checked){$('stale').textContent='Checking · previous result';$('stale').hidden=false;}
+  $('check-announcement').textContent='';
   if(checked)checked.inspection_id=null;updateInspectionButton();
   try{
     const data=await(await request('/api/check',{project:current})).json();
     if(expected!==revision){notice('Inputs changed during checking. Check the current draft.');return;}
-    checked={...data,revision:expected,project:current};showDerived(data.derived);resultCards(data.result);drawPreview(data.preview);$('stale').hidden=true;
+    checked={...data,revision:expected,project:current};showDerived(data.derived);renderResults(data.result);drawPreview(data.preview);$('stale').hidden=true;
     $('angle-equivalent').textContent=`≈ ${data.result.pressure_angle_limit_deg_approx.toFixed(3)}° (display only)`;
     $('export').disabled=data.result.status!=='pass';
+    announceResult(data.result);
   }catch(error){notice(error.message);$('profile-status').textContent=checked?`Stale · previous ${states[checked.result.status]}`:'Not checked';$('profile-status').className='unknown';if(checked){$('stale').textContent='Check failed · previous result';$('stale').hidden=false;}}finally{checkBusy=false;$('check').disabled=false;$('check').textContent='Check geometry';updateInspectionButton();}
 });
 $('cursor').addEventListener('input',()=>setCursor(Number($('cursor').value)));
@@ -162,7 +204,7 @@ for(const id of ['profile','displacement'])$(id).addEventListener('pointerdown',
   const closest=points.reduce((a,b)=>distance(a)<distance(b)?a:b);setCursor(closest.angle_deg);
 });
 for(const [id,key] of [['base','base_radius'],['roller','roller_radius'],['slope','maximum_pressure_slope'],['tolerance','tolerance_mm']])bindInput($(id),value=>project[key]=value);
-$('add').addEventListener('click',()=>edit(()=>project.segments.push({span_deg:'30',end_mm:'0'})));
+$('add').addEventListener('click',()=>edit(()=>project.segments.push({span_deg:'30',end_mm:'0'}),{index:project.segments.length,control:'span'}));
 $('undo').addEventListener('click',()=>{if(!history.length)return;project=history.pop();focusSnapshot=null;derived=[];changed();renderInputs();$('undo').disabled=!history.length;});
 $('save').addEventListener('click',async()=>{const expected=revision;try{const data=await validate();if(expected!==revision){notice('Inputs changed. Save the current draft again.');return;}download(new Blob([JSON.stringify(data.project,null,2)+'\n'],{type:'application/json'}),'camwright-project.json');dirty=false;notice('Project downloaded.');}catch(error){notice(error.message);}});
 $('open').addEventListener('click',()=>{$('file').value='';$('file').click();});

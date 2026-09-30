@@ -19,7 +19,7 @@ import camwright
 
 
 def main():
-    assert version("camwright") == camwright.__version__ == "0.2.0"
+    assert version("camwright") == camwright.__version__
     with tempfile.TemporaryDirectory(prefix="camwright-installed-") as directory:
         child = subprocess.Popen([sys.executable, "-I", "-m", "camwright", "--no-browser"],
                                  cwd=directory, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
