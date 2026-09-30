@@ -4,7 +4,7 @@
 
 <p align="center">Design an in-line roller cam, check its continuous geometry, and export the profile with bounded approximation error.</p>
 
-<p align="center"><a href="#run-locally">Run locally</a> · <a href="https://github.com/nazeeh111/Camwright/releases/tag/v0.1.0">Download v0.1.0</a></p>
+<p align="center"><a href="#run-locally">Run locally</a> · <a href="https://github.com/nazeeh111/Camwright/releases/latest">Download latest release</a></p>
 
 ![Camwright with a failed pressure check, inspection saving enabled and geometry export disabled](docs/workspace.jpg)
 
