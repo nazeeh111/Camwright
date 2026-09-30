@@ -1,0 +1,4 @@
+include run.py
+include .github/workflows/check.yml
+recursive-include docs *.md *.svg *.jpg
+recursive-include tests *.py

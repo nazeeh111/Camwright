@@ -67,3 +67,29 @@ class ServerTests(unittest.TestCase):
         status,_,raw=self.request("POST","/api/export",{"project":project,"project_id":identity(project)})
         self.assertEqual(409,status)
         self.assertEqual("fail",json.loads(raw)["status"])
+
+    def test_inspection_route_uses_only_current_completed_backend_snapshot(self):
+        project = example()
+        status, _, raw = self.request("POST", "/api/check", {"project": project})
+        checked = json.loads(raw)
+        self.assertEqual(200, status)
+        self.assertIn("inspection_id", checked)
+        request = {"project": project, "project_id": checked["project_id"],
+                   "inspection_id": checked["inspection_id"]}
+        status, headers, raw = self.request("POST", "/api/inspection", request)
+        self.assertEqual(200, status)
+        self.assertEqual("application/zip", headers["Content-Type"])
+        with zipfile.ZipFile(io.BytesIO(raw)) as bundle:
+            self.assertEqual({"inspection.json", "inspection.html"}, set(bundle.namelist()))
+            self.assertEqual(checked["result"], json.loads(bundle.read("inspection.json"))["result"])
+        self.assertEqual(400, self.request("POST", "/api/inspection", {**request, "result": {"status": "pass"}})[0])
+        self.assertEqual(409, self.request("POST", "/api/inspection", {**request, "inspection_id": "0"*32})[0])
+        self.assertEqual(400, self.request("POST", "/api/inspection", {**request, "inspection_id": "invalid"})[0])
+        invalid = {**project, "base_radius": "invalid"}
+        self.assertEqual(400, self.request("POST", "/api/check", {"project": invalid})[0])
+        self.assertEqual(409, self.request("POST", "/api/inspection", request)[0])
+        status, _, raw = self.request("POST", "/api/check", {"project": project})
+        checked = json.loads(raw)
+        request["inspection_id"] = checked["inspection_id"]
+        self.assertEqual(400, self.request("POST", "/api/check", raw=b"invalid JSON")[0])
+        self.assertEqual(409, self.request("POST", "/api/inspection", request)[0])

@@ -19,7 +19,8 @@
 <div class="table-scroll" tabindex="0" role="region" aria-label="Motion segments. Scroll horizontally on narrow screens."><table><thead><tr><th>Segment</th><th>Span (°)</th><th>End lift (mm)</th><th>Start (°)</th><th>Motion</th><th><span class="sr-only">Reorder or remove</span></th></tr></thead><tbody id="segments"></tbody></table></div>
 <div class="motion-actions"><button id="add">Add segment</button><span id="cycle-total" class="hint"></span></div>
 <p class="hint">Positive spans, exactly 360°, final lift 0 mm. Fixed-decimal inputs; no scientific notation.</p>
-<div class="check-actions"><button id="check" class="primary">Check geometry</button><button id="export" disabled>Export profile ZIP</button></div>
+<div class="check-actions"><button id="check" class="primary">Check geometry</button><button id="inspection" disabled>Save inspection</button><button id="export" disabled>Export profile ZIP</button></div>
+<p class="hint">Save a completed Pass, Fail or Unresolved check as a readonly offline report with exact inputs. Profile export requires a fresh Pass and tolerance bounds.</p>
 </section>
 <section class="drawing" aria-labelledby="drawing-heading">
 <div class="plot-heading"><h2 id="drawing-heading">Profile</h2><span class="hint">mm · +X at 0° · counterclockwise</span></div>
