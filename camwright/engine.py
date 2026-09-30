@@ -26,7 +26,10 @@ def calculate(operation, project, project_id=None, *, check_budget=CHECK_BUDGET,
     checks = geometry.check_design(project, budget=check_budget)
     if operation == "check":
         return {"project_id": current_id, "result": compact_result(checks, project),
-                "derived": derived(project), "preview": preview(project)}
+                "derived": derived(project), "preview": preview(project),
+                "implementation_version": __version__,
+                "check_limits": {"interval_budget_per_condition": check_budget,
+                                 "maximum_subdivision_depth": 24}}
     if operation != "export":
         raise ValueError("unknown calculation operation")
     if checks["status"] != "pass":

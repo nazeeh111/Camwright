@@ -3,6 +3,7 @@
 Run with the clean environment's Python: python -I tests/installed_smoke.py.
 """
 import io
+from importlib.metadata import version
 import json
 from pathlib import Path
 import selectors
@@ -18,6 +19,7 @@ import camwright
 
 
 def main():
+    assert version("camwright") == camwright.__version__ == "0.2.0"
     with tempfile.TemporaryDirectory(prefix="camwright-installed-") as directory:
         child = subprocess.Popen([sys.executable, "-I", "-m", "camwright", "--no-browser"],
                                  cwd=directory, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
@@ -49,6 +51,22 @@ def main():
             status, _, raw = request("/api/check", {"project": project})
             checked = json.loads(raw)
             assert status == 200 and checked["result"]["status"] == "pass"
+
+            def save_inspection(project, checked):
+                status, headers, raw = request("/api/inspection", {"project": project,
+                    "project_id": checked["project_id"], "inspection_id": checked["inspection_id"]})
+                assert status == 200 and headers["Content-Type"] == "application/zip"
+                with zipfile.ZipFile(io.BytesIO(raw)) as bundle:
+                    assert set(bundle.namelist()) == {"inspection.json", "inspection.html"}
+                    record = json.loads(bundle.read("inspection.json"))
+                    assert record["project"] == project and record["result"] == checked["result"]
+                    assert record["implementation_version"] == version("camwright")
+                    assert record["project_id"] == checked["project_id"]
+                    assert record["inspection_id"] == checked["inspection_id"]
+                    assert record["check_limits"] == checked["check_limits"]
+                    assert b"Saved observation" in bundle.read("inspection.html")
+
+            save_inspection(project, checked)
             status, headers, raw = request("/api/export", {"project": project, "project_id": checked["project_id"]})
             assert status == 200 and headers["Content-Type"] == "application/zip"
             with zipfile.ZipFile(io.BytesIO(raw)) as bundle:
@@ -60,10 +78,15 @@ def main():
             assert status == 200 and failed["result"]["status"] == "fail"
             status, headers, _ = request("/api/export", {"project": project, "project_id": failed["project_id"]})
             assert status == 409 and headers["Content-Type"] == "application/json"
+            save_inspection(project, failed)
             unresolved = json.loads((Path(camwright.__file__).parent/"examples/unresolved.json").read_text())
             status, _, raw = request("/api/check", {"project": unresolved})
-            assert status == 200 and json.loads(raw)["result"]["status"] == "unknown"
-            print("Installed workflow passed: assets, current project, Pass/Fail/Unresolved, complete ZIP and refusal")
+            checked = json.loads(raw)
+            assert status == 200 and checked["result"]["status"] == "unknown"
+            save_inspection(unresolved, checked)
+            status, _, raw = request("/api/export", {"project": unresolved, "project_id": checked["project_id"]})
+            assert status == 409 and "zip_base64" not in json.loads(raw)
+            print("Installed workflow passed: assets, metadata, exact Pass/Fail/Unresolved inspection snapshots, complete geometry ZIP and refusal")
         finally:
             if child.poll() is None:
                 child.send_signal(signal.SIGINT)

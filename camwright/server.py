@@ -18,7 +18,9 @@ STATIC = {"/": ("index.html", "text/html; charset=utf-8"),
           "/favicon.svg": ("favicon.svg", "image/svg+xml")}
 POST_KEYS = {"/api/validate": {"project"}, "/api/draft": {"project"}, "/api/check": {"project"},
              "/api/point": {"project", "angle_deg"},
-             "/api/export": {"project", "project_id"}, "/api/cancel": {"project_id"}}
+             "/api/export": {"project", "project_id"},
+             "/api/inspection": {"project", "project_id", "inspection_id"},
+             "/api/cancel": {"project_id"}}
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -91,6 +93,8 @@ class Handler(BaseHTTPRequestHandler):
         if length > MAX_BODY:
             self.reject(413, "body_limit", "Request exceeds 32 KiB")
             return
+        if self.path == "/api/check":
+            self.server.calculator.invalidate_inspection()
         try:
             raw = self.rfile.read(length)
             if len(raw) != length:
@@ -111,21 +115,31 @@ class Handler(BaseHTTPRequestHandler):
             elif self.path == "/api/point":
                 self.json(200, point(project, request["angle_deg"]))
             else:
-                if self.path == "/api/export" and (not isinstance(request["project_id"], str) or
+                if self.path in {"/api/export", "/api/inspection"} and (not isinstance(request["project_id"], str) or
                         re.fullmatch(r"[a-f0-9]{64}", request["project_id"]) is None):
                     raise ValueError("invalid project identity")
-                result = self.server.calculator.run("check" if self.path == "/api/check" else "export",
-                                                    project, request.get("project_id"))
+                if self.path == "/api/inspection":
+                    if (not isinstance(request["inspection_id"], str) or
+                            re.fullmatch(r"[a-f0-9]{32}", request["inspection_id"]) is None):
+                        raise ValueError("invalid inspection receipt")
+                    result = self.server.calculator.save_inspection(project, request["project_id"], request["inspection_id"])
+                else:
+                    result = self.server.calculator.run("check" if self.path == "/api/check" else "export",
+                                                        project, request.get("project_id"))
                 if "error" in result:
                     self.json(429 if result["error"]["code"] == "busy" else 409, result)
                 elif "zip_base64" in result:
-                    summary = result["summary"]
-                    self.send_bytes(200, base64.b64decode(result["zip_base64"]), "application/zip", {
-                        "Content-Disposition": 'attachment; filename="camwright-profile.zip"',
-                        "X-Camwright-Project-Id": result["project_id"],
-                        "X-Camwright-Vertices": summary["vertices"],
-                        "X-Camwright-Cam-Bound-Mm": summary["maximum_cam_bound_mm"],
-                        "X-Camwright-Pitch-Bound-Mm": summary["maximum_pitch_bound_mm"]})
+                    headers = {"X-Camwright-Project-Id": result["project_id"]}
+                    if self.path == "/api/inspection":
+                        headers.update({"Content-Disposition": 'attachment; filename="camwright-inspection.zip"',
+                                        "X-Camwright-Inspection-Id": result["inspection_id"]})
+                    else:
+                        summary = result["summary"]
+                        headers.update({"Content-Disposition": 'attachment; filename="camwright-profile.zip"',
+                                        "X-Camwright-Vertices": summary["vertices"],
+                                        "X-Camwright-Cam-Bound-Mm": summary["maximum_cam_bound_mm"],
+                                        "X-Camwright-Pitch-Bound-Mm": summary["maximum_pitch_bound_mm"]})
+                    self.send_bytes(200, base64.b64decode(result["zip_base64"]), "application/zip", headers)
                 else:
                     self.json(200, result)
         except (ValueError, KeyError, TypeError, RecursionError) as error:

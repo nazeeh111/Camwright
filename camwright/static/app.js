@@ -3,6 +3,7 @@ const ns = 'http://www.w3.org/2000/svg';
 let project, derived = [], history = [], revision = 0, checked = null, dirty = false;
 let draftTimer;
 let checkBusy = false, focusSnapshot = null, cursorTimer, cursorRevision = 0;
+let inspectionBusy = false;
 const copy = value => structuredClone(value);
 const labels = {pressure:'Pressure limit',convex_pitch:'Strictly convex pitch',roller_curvature:'Local roller curvature'};
 const states = {pass:'Pass',fail:'Fail',unknown:'Unresolved'};
@@ -18,6 +19,9 @@ function svg(tag, attrs = {}) {
   return e;
 }
 function notice(message) { $('notice').textContent=message; $('notice').hidden=!message; }
+function updateInspectionButton() {
+  $('inspection').disabled=inspectionBusy||checkBusy||!checked?.inspection_id||checked.revision!==revision;
+}
 async function request(path, body, raw) {
   const response = await fetch(path, {method:body===undefined?'GET':'POST',headers:body===undefined?{}:{'Content-Type':'application/json'},body:body===undefined?undefined:raw??JSON.stringify(body)});
   if (!response.ok) {
@@ -35,6 +39,7 @@ function changed() {
   revision++; dirty=true;if(checked){$('stale').textContent='Inputs changed · previous result';$('stale').hidden=false;}
   $('profile-status').textContent=checked?`Stale · previous ${states[checked.result.status]}`:'Not checked';$('profile-status').className='unknown';$('profile-witness').hidden=true;
   $('export').disabled=true; $('export-status').hidden=true;
+  updateInspectionButton();
   clearTimeout(draftTimer);const expected=revision;draftTimer=setTimeout(async()=>{try{const data=await(await request('/api/draft',{project:copy(project)})).json();if(expected===revision)showDerived(data.derived);}catch{}},180);
   $('cursor').disabled=true; $('cursor-values').replaceChildren();
   derived=[];document.querySelectorAll('.derived-start,.derived-motion').forEach(e=>e.textContent='—');
@@ -78,6 +83,7 @@ function replaceProject(next,data,saved=false) {
   if(project)remember();project=copy(next);derived=data?.segments||[];revision++;checked=null;dirty=!saved;focusSnapshot=null;
   renderInputs();showDerived(data);for(const id of ['base','roller','slope','tolerance','save','example'])$(id).disabled=false;$('check').disabled=checkBusy;$('undo').disabled=!history.length;$('overall').textContent='Not checked';$('overall').className='';$('profile-status').textContent='Not checked';$('profile-status').className='';$('profile-witness').hidden=true;$('stale').hidden=true;
   $('check-details').textContent='Check the current motion cycle and dimensions.';$('export').disabled=true;$('cursor').disabled=true;$('cursor').value=0;$('cursor-angle').value='0°';
+  updateInspectionButton();
   $('angle-equivalent').textContent='Exact slope; approximate angle shown after checking.';$('cursor-values').replaceChildren();$('profile').replaceChildren(svg('text',{x:260,y:210,'text-anchor':'middle'}));$('profile').firstChild.textContent='Check geometry to draw the profile.';$('displacement').replaceChildren();$('export-status').hidden=true;
 }
 function approximate(value){const parts=String(value).split('/');return Number(parts[0])/(parts.length>1?Number(parts[1]):1);}
@@ -138,13 +144,14 @@ function download(blob,name){const url=URL.createObjectURL(blob),a=element('a',{
 async function validate(raw) {return(await request('/api/validate',{project},raw)).json();}
 $('check').addEventListener('click',async()=>{
   if(checkBusy)return;const current=copy(project),expected=revision;checkBusy=true;$('check').disabled=true;$('check').textContent='Checking…';$('export').disabled=true;notice('');$('profile-status').textContent='Checking geometry…';$('profile-status').className='unknown';$('profile-witness').hidden=true;if(checked){$('stale').textContent='Checking · previous result';$('stale').hidden=false;}
+  if(checked)checked.inspection_id=null;updateInspectionButton();
   try{
     const data=await(await request('/api/check',{project:current})).json();
     if(expected!==revision){notice('Inputs changed during checking. Check the current draft.');return;}
     checked={...data,revision:expected,project:current};showDerived(data.derived);resultCards(data.result);drawPreview(data.preview);$('stale').hidden=true;
     $('angle-equivalent').textContent=`≈ ${data.result.pressure_angle_limit_deg_approx.toFixed(3)}° (display only)`;
     $('export').disabled=data.result.status!=='pass';
-  }catch(error){notice(error.message);$('profile-status').textContent=checked?`Stale · previous ${states[checked.result.status]}`:'Not checked';$('profile-status').className='unknown';if(checked){$('stale').textContent='Check failed · previous result';$('stale').hidden=false;}}finally{checkBusy=false;$('check').disabled=false;$('check').textContent='Check geometry';}
+  }catch(error){notice(error.message);$('profile-status').textContent=checked?`Stale · previous ${states[checked.result.status]}`:'Not checked';$('profile-status').className='unknown';if(checked){$('stale').textContent='Check failed · previous result';$('stale').hidden=false;}}finally{checkBusy=false;$('check').disabled=false;$('check').textContent='Check geometry';updateInspectionButton();}
 });
 $('cursor').addEventListener('input',()=>setCursor(Number($('cursor').value)));
 for(const id of ['profile','displacement'])$(id).addEventListener('pointerdown',event=>{
@@ -164,6 +171,18 @@ $('file').addEventListener('change',async()=>{
   const expected=revision;try{const text=await file.text(),data=await validate('{"project":'+text+'}');if(expected!==revision){notice('Inputs changed while opening. Select the file again.');return;}replaceProject(data.project,data.derived,true);notice('Project opened. Check geometry to update the profile.');}catch(error){notice(error.message);}
 });
 $('example').addEventListener('click',async()=>{if(dirty&&!confirm('Replace the current draft with the example? Save project first to keep it.'))return;const expected=revision;try{const data=await(await request('/api/example')).json();const valid=await(await request('/api/validate',{project:data.project??data})).json();if(expected!==revision){notice('Inputs changed while loading the example. Current draft retained.');return;}replaceProject(valid.project,valid.derived,true);notice('Example loaded.');}catch(error){notice(error.message);}});
+$('inspection').addEventListener('click',async()=>{
+  if(inspectionBusy||checkBusy||!checked?.inspection_id||checked.revision!==revision)return;
+  const expected=revision,receipt=checked.inspection_id,current=copy(project),projectId=checked.project_id;
+  inspectionBusy=true;updateInspectionButton();$('inspection').textContent='Saving inspection…';notice('');
+  try{
+    const response=await request('/api/inspection',{project:current,project_id:projectId,inspection_id:receipt});
+    const blob=await response.blob();
+    if(expected!==revision||receipt!==checked?.inspection_id||checkBusy){notice('Inputs or check changed while saving. Save the current completed inspection again.');return;}
+    download(blob,'camwright-inspection.zip');notice('Inspection downloaded. Open inspection.html from the ZIP to read the saved observation offline.');
+  }catch(error){if(expected===revision&&receipt===checked?.inspection_id)notice(error.message);}
+  finally{inspectionBusy=false;$('inspection').textContent='Save inspection';updateInspectionButton();}
+});
 $('export').addEventListener('click',async()=>{
   if(!checked||checked.revision!==revision||checked.result.status!=='pass')return;
   const expected=revision;$('export').disabled=true;$('export').textContent='Bounding export…';$('export-status').hidden=true;notice('');
