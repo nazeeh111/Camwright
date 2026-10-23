@@ -5,11 +5,12 @@
 <header><strong>Camwright</strong><span>In-line radial roller cam · 3-4-5 motion</span></header>
 <main>
 <div class="toolbar"><h1>Cam profile</h1><div class="actions"><button id="undo" disabled>Undo</button><button id="open">Open project</button><button id="save">Save project</button><button id="example">Example</button></div></div>
+<div class="first-run"><p><strong>Motion in. Cam profile out.</strong> The bundled cycle lifts a roller follower 20 mm. Its 25 mm base radius passes the geometry check; try 20 mm to expose the pressure limit.</p><nav aria-label="Workspace sections"><a href="#dimensions-heading">Edit motion &amp; dimensions</a><a href="#drawing-heading">Inspect profile</a><a href="#results-heading">Read checks</a></nav></div>
 <p id="notice" role="status" aria-live="polite" hidden></p>
 <p id="check-announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
 <div class="workspace">
 <section class="inputs" aria-labelledby="dimensions-heading">
-<h2 id="dimensions-heading">Dimensions and limits</h2>
+<h2 id="dimensions-heading" tabindex="-1">Dimensions and limits</h2>
 <div class="dimensions">
 <label>Base radius (mm)<input id="base" type="text" inputmode="decimal" maxlength="32"></label>
 <label>Roller radius (mm)<input id="roller" type="text" inputmode="decimal" maxlength="32"></label>
@@ -24,7 +25,7 @@
 <p class="hint">Save a completed Pass, Fail or Unresolved check as a readonly offline report with exact inputs. Profile export requires a fresh Pass and tolerance bounds.</p>
 </section>
 <section class="drawing" aria-labelledby="drawing-heading">
-<div class="plot-heading"><h2 id="drawing-heading">Profile</h2><span class="hint">mm · +X at 0° · counterclockwise</span></div>
+<div class="plot-heading"><h2 id="drawing-heading" tabindex="-1">Profile</h2><span class="hint">mm · +X at 0° · counterclockwise</span></div>
 <div class="profile-state"><strong id="profile-status">Not checked</strong><button id="profile-witness" hidden></button></div>
 <div class="legend"><span><i class="solid"></i>Physical cam</span><span><i class="dashed"></i>Pitch curve / roller center</span></div>
 <svg id="profile" viewBox="0 0 520 420" role="img" aria-label="Physical cam and pitch curve profile"><text x="260" y="210" text-anchor="middle">Check geometry to draw the profile.</text></svg>
@@ -35,7 +36,7 @@
 <p class="hint">Pitch follows the roller center; the physical cam is offset by the roller radius along the normal. Preview lines are visual samples.</p>
 </section>
 </div>
-<section id="results" class="results" aria-labelledby="results-heading"><div class="result-title"><h2 id="results-heading">Geometric checks</h2><strong id="overall">Not checked</strong><span id="stale" hidden>Inputs changed · previous result</span></div><div id="check-details">Check the current motion cycle and dimensions.</div><p id="export-status" hidden></p></section>
+<section id="results" class="results" aria-labelledby="results-heading"><div class="result-title"><h2 id="results-heading" tabindex="-1">Geometric checks</h2><strong id="overall">Not checked</strong><span id="stale" hidden>Inputs changed · previous result</span></div><div id="check-details">Check the current motion cycle and dimensions.</div><p id="export-status" hidden></p></section>
 <footer>Geometric model only. Dynamics, stress, tool compensation and manufacturing fit are outside this check.</footer>
 </main>
 <input id="file" type="file" accept=".json,application/json" hidden>
