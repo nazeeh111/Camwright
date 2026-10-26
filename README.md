@@ -50,8 +50,8 @@ Only one calculation runs at once in a separate process. Checks use 2,048 interv
 
 The bounds concern the stated geometric model and mathematical approximation. They do not establish dynamic loads, stress, spring contact, cutter compensation, dimensional accuracy after machining or fitness of hardware. Native CAD import and real machining have not been verified. The bundled `unresolved.json` is a deliberately tuned numerical-boundary example, not a recommended design.
 
-Original code is MIT licensed. The interval arithmetic, Bernstein bounds and interpolation remainder are established mathematics implemented here; no claim of a new mathematical method or product-name availability is made. See [geometry contract](docs/geometry.md) and [local API](docs/api.md).
+[MIT license](LICENSE). See [geometry contract](docs/geometry.md) and [local API](docs/api.md).
 
-Run checks with `python3 -m unittest discover -v`. The CI workflow runs the complete suite and an installed-wheel workflow on Python 3.12 and 3.14. The source archive includes the tests, installed smoke check, workflow and model/API docs. Local verification results for this change are recorded separately; no CI run is claimed before publication.
+Run checks with `python3 -m unittest discover -v`. The CI workflow runs the complete suite and an installed-wheel workflow on Python 3.12 and 3.14. The source archive includes the tests, installed smoke check, workflow and model/API docs.
 
 When Node.js 18 or newer is available, the suite also checks frontend result announcements, segment focus, witness navigation and stale export gates. Run those cases directly with `node --test tests/frontend.test.cjs`. They exercise the real frontend with a small test-only DOM and HTTP substitute; browser layout and screen-reader speech need separate runtime checks.
