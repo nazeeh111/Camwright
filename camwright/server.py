@@ -6,6 +6,7 @@ from pathlib import Path
 import re
 import socket
 
+from . import __version__
 from .engine import refused
 from .project import MAX_BODY, derived, exact_keys, identity, parse_json, point, validate_project
 from .runtime import Calculator
@@ -20,7 +21,9 @@ POST_KEYS = {"/api/validate": {"project"}, "/api/draft": {"project"}, "/api/chec
              "/api/point": {"project", "angle_deg"},
              "/api/export": {"project", "project_id"},
              "/api/inspection": {"project", "project_id", "inspection_id"},
-             "/api/cancel": {"project_id"}}
+             "/api/cancel": {"project_id"},
+             "/api/explore": {"project", "options"},
+             "/api/select": {"project", "project_id", "options"}}
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -65,7 +68,10 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if not self.trusted_host():
             return
-        if self.path == "/api/example":
+        if self.path == "/api/health":
+            self.json(200, {"service": "Camwright", "implementation_version": __version__,
+                            "model": "inline-roller-345-convex", "units": "mm", "local_only": True})
+        elif self.path == "/api/example":
             self.json(200, json.loads((PACKAGE / "examples/accepted.json").read_text()))
         elif self.path in STATIC:
             filename, content_type = STATIC[self.path]
@@ -115,7 +121,7 @@ class Handler(BaseHTTPRequestHandler):
             elif self.path == "/api/point":
                 self.json(200, point(project, request["angle_deg"]))
             else:
-                if self.path in {"/api/export", "/api/inspection"} and (not isinstance(request["project_id"], str) or
+                if self.path in {"/api/export", "/api/inspection", "/api/select"} and (not isinstance(request["project_id"], str) or
                         re.fullmatch(r"[a-f0-9]{64}", request["project_id"]) is None):
                     raise ValueError("invalid project identity")
                 if self.path == "/api/inspection":
@@ -124,8 +130,8 @@ class Handler(BaseHTTPRequestHandler):
                         raise ValueError("invalid inspection receipt")
                     result = self.server.calculator.save_inspection(project, request["project_id"], request["inspection_id"])
                 else:
-                    result = self.server.calculator.run("check" if self.path == "/api/check" else "export",
-                                                        project, request.get("project_id"))
+                    operation={"/api/check":"check","/api/export":"export","/api/explore":"explore","/api/select":"select"}[self.path]
+                    result = self.server.calculator.run(operation, project, request.get("project_id"), request.get("options"))
                 if "error" in result:
                     self.json(429 if result["error"]["code"] == "busy" else 409, result)
                 elif "zip_base64" in result:
@@ -137,6 +143,7 @@ class Handler(BaseHTTPRequestHandler):
                         summary = result["summary"]
                         headers.update({"Content-Disposition": 'attachment; filename="camwright-profile.zip"',
                                         "X-Camwright-Vertices": summary["vertices"],
+                                        "X-Camwright-CAD-Status": summary["cad_status"],
                                         "X-Camwright-Cam-Bound-Mm": summary["maximum_cam_bound_mm"],
                                         "X-Camwright-Pitch-Bound-Mm": summary["maximum_pitch_bound_mm"]})
                     self.send_bytes(200, base64.b64decode(result["zip_base64"]), "application/zip", headers)

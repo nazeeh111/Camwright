@@ -70,7 +70,11 @@ def main():
             status, headers, raw = request("/api/export", {"project": project, "project_id": checked["project_id"]})
             assert status == 200 and headers["Content-Type"] == "application/zip"
             with zipfile.ZipFile(io.BytesIO(raw)) as bundle:
-                assert len(bundle.namelist()) == 7
+                expected_members = {"cam.csv", "pitch.csv", "cam.svg", "pitch.svg",
+                                    "cam.dxf", "pitch.dxf", "camwright-project.json",
+                                    "checks.json", "export.json"}
+                names = bundle.namelist()
+                assert set(names) == expected_members and len(names) == len(expected_members), names
                 assert json.loads(bundle.read("camwright-project.json")) == project
             project["base_radius"] = "20"
             status, _, raw = request("/api/check", {"project": project})

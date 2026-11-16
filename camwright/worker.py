@@ -15,7 +15,7 @@ def main():
     try:
         raw = sys.stdin.buffer.read(MAX_BODY+1)
         request = parse_json(raw)
-        result = calculate(request["operation"], request["project"], request.get("project_id"))
+        result = calculate(request["operation"], request["project"], request.get("project_id"), options=request.get("options"))
     except (ValueError, KeyError, TypeError, MemoryError) as error:
         result = refused("calculation_error", str(error))
     sys.stdout.write(json.dumps(result, separators=(",", ":"), allow_nan=False))

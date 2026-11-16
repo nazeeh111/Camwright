@@ -19,6 +19,7 @@ Numeric values in projects are exact fixed-decimal strings; `version` is the onl
 
 | Route | Request | Result |
 | --- | --- | --- |
+| GET `/api/health` | None | Read-only service, implementation version, model, units and local-only identity; no project/path/result |
 | GET `/api/example` | None | Bundled default project |
 | POST `/api/validate` | `{project}` | `{project, project_id, derived}` after complete validation |
 | POST `/api/draft` | `{project}` | `{derived}`; individual bounds apply, cycle closure does not; no geometry/check state |
@@ -39,3 +40,57 @@ Numeric values in projects are exact fixed-decimal strings; `version` is the onl
 The inspection ZIP contains only `inspection.json` and `inspection.html`. The JSON has `schema:"camwright.inspection"`, `version:1`, project/receipt identities, UTC completion time, implementation version, model/units, actual `check_limits`, worker deadline, exact `project`, `derived`, and native `result`. Current checks use 2,048 interval evaluations per condition and segment and maximum subdivision depth 24. Snapshot memory, combined uncompressed archive contents and download size are each limited to 512 KiB. Native Pass, Fail and Unknown (`unknown`, displayed as Unresolved) are all savable; this is a saved observation, not hardware approval or an export-tolerance Pass. The literal-escaped readonly HTML uses no scripts, remote assets or network requests. The report includes keyboard-focusable scrolling tables for narrow screens. It does not import saved statuses into the workspace. To reuse inputs, extract the JSON's project object into a project file and open it normally, then run a fresh check.
 
 Geometry ZIP headers include `X-Camwright-Project-Id`, `X-Camwright-Vertices`, `X-Camwright-Cam-Bound-Mm`, `X-Camwright-Pitch-Bound-Mm`. Inspection ZIP headers include project identity and `X-Camwright-Inspection-Id`. Full geometry interval certificates and version/orientation/project identity are in `export.json`. HTTP 400 rejects invalid projects/receipts; 403 rejects Host/Origin; 413 rejects body length; 415 rejects content type; 429 indicates a busy worker; 409 reports export refusal, missing/stale inspection, timeout or cancellation. Fixed static assets are `/`, `/index.html`, `/app.js`, `/styles.css`, `/favicon.svg`. Requests never select filesystem paths.
+
+## Finite radius exploration and selection
+
+`POST /api/explore` takes `{project,options}`. Options have exactly
+`base_radii`, `roller_radii` (lists of1–16 distinct positive exact fixed-decimal
+strings), and `max_candidates` (integer1–64). The Cartesian product is at most64.
+Only those two dimensions change; motion, pressure constraint, units and export
+tolerance stay tied to the source project. One existing worker slot and30-second
+hard deadline applies. `/api/cancel` uses the original source project identity.
+No failed/cancelled/deadline worker creates geometry.
+
+Every evaluated cell has its original indices, exact radii/project identity and
+native `pass`, `fail` or `unknown` checks. Evaluation order is zero-lift pitch
+radius `base+roller`, then base, roller and original indices. This is a declared
+geometric packaging criterion, not a physical load/wear proxy or an assumption
+that changing radii is monotonic. The result has a source-bound `request`, its
+`request_id`, evaluated/total counts, candidate budget, `complete`, `status`
+(`complete`/`unfinished`), and a best checked `selection` when available. The
+`outcome` distinguishes a passing candidate, unknown space and a completely
+classified all-fail grid. Only a complete grid with no unknowns can set
+`minimum_within_grid:true`. Any unknown or unfinished work conservatively prevents
+that claim, even if a later candidate passes. There is no minimum claim outside
+the declared grid. A direct library cancellation callback is cooperative between
+bounded candidate checks; the server's process cancellation remains immediate.
+
+`POST /api/select` takes `{project,project_id,options}`. Its options have exactly
+`base_radii`, `roller_radii`, `request_id`, `base_index`, `roller_index`.
+The current source and grid must match their identity. The chosen candidate is
+then freshly checked; saved classifications, best flags or mesh data are never
+authority. Failure/unknown produces `selection_refused`, with no chosen project
+or geometry. Success returns the exact chosen `project`, its new `project_id`,
+the source/grid identities and `selection_rechecked:true`. Run the existing
+check/export workflow on that project. These operations do not replace the
+server's saved inspection receipt; a new selected-project check does.
+
+## CAD exchange
+
+A successful geometry ZIP normally also contains `cam.dxf` and `pitch.dxf`.
+Each is an ASCII R2000 closed LWPOLYLINE in the+Z plane, `$INSUNITS=4` (mm), with no
+bulges. Its vertices are exactly the existing certified12-place CSV decimals,
+without the repeated final closure vertex. The CLOSED flag supplies the same
+final certified chord. No coordinate recomputation, Y inversion, spline fitting
+or cutter compensation is introduced. Export metadata records format status;
+`X-Camwright-CAD-Status` is `pass` or `unavailable`.
+
+A mathematically admitted tiny cam/coarse tolerance can yield too few distinct
+emitted vertices for a nondegenerate CAD face. Its certified CSV/SVG remain
+available, while metadata explicitly marks DXF unavailable and omits both DXFs.
+Request a tighter tolerance if possible; finer exports can still hit the existing
+work budget. This preserves the supported mathematical exporter without
+fabricating a CAD contour. Valid native CAD entities are not fabrication or
+hardware approval.
+
+CLI inputs must be regular files and are captured once through a nonblocking, byte-bounded descriptor. FIFOs and devices are refused. Output publication never overwrites an existing path. If complete publication succeeds but removal of its owned staging file fails, the command succeeds and writes a structured cleanup warning to stderr identifying the leftover staging path. It does not retry a permission failure.

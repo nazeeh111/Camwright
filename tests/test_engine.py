@@ -16,7 +16,7 @@ class EngineTests(unittest.TestCase):
         result = calculate("export", project, identity(project))
         self.assertEqual("pass", result["status"])
         with zipfile.ZipFile(io.BytesIO(base64.b64decode(result["zip_base64"]))) as bundle:
-            self.assertEqual({"cam.csv", "pitch.csv", "cam.svg", "pitch.svg", "checks.json", "export.json", "camwright-project.json"}, set(bundle.namelist()))
+            self.assertEqual({"cam.csv", "pitch.csv", "cam.svg", "pitch.svg", "cam.dxf", "pitch.dxf", "checks.json", "export.json", "camwright-project.json"}, set(bundle.namelist()))
             self.assertEqual(project, json.loads(bundle.read("camwright-project.json")))
             metadata = json.loads(bundle.read("export.json"))
             self.assertEqual(identity(project), metadata["project_id"])

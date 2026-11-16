@@ -3,7 +3,8 @@ const ns = 'http://www.w3.org/2000/svg';
 let project, derived = [], history = [], revision = 0, checked = null, dirty = false;
 let draftTimer;
 let checkBusy = false, focusSnapshot = null, cursorTimer, cursorRevision = 0;
-let inspectionBusy = false;
+let inspectionBusy = false, exportBusy = false;
+let gridEpoch = 0, gridReport = null, gridReportRevision = -1, gridReportEpoch = -1, gridReportKey = null, gridOperation = null;
 const copy = value => structuredClone(value);
 const labels = {pressure:'Pressure limit',convex_pitch:'Strictly convex pitch',roller_curvature:'Local roller curvature'};
 const states = {pass:'Pass',fail:'Fail',unknown:'Unresolved'};
@@ -20,7 +21,7 @@ function svg(tag, attrs = {}) {
 }
 function notice(message) { $('notice').textContent=message; $('notice').hidden=!message; }
 function updateInspectionButton() {
-  $('inspection').disabled=inspectionBusy||checkBusy||!checked?.inspection_id||checked.revision!==revision;
+  $('inspection').disabled=inspectionBusy||checkBusy||exportBusy||!!gridOperation||!checked?.inspection_id||checked.revision!==revision;
 }
 async function request(path, body, raw) {
   const response = await fetch(path, {method:body===undefined?'GET':'POST',headers:body===undefined?{}:{'Content-Type':'application/json'},body:body===undefined?undefined:raw??JSON.stringify(body)});
@@ -46,7 +47,7 @@ function changed() {
   derived=[];document.querySelectorAll('.derived-start,.derived-motion').forEach(e=>e.textContent='—');
   $('cycle-total').textContent='Cycle edited · validate with Check geometry';
   $('angle-equivalent').textContent='Exact slope; approximate angle shown after checking.';
-  notice('');
+  notice('');invalidateGrid();
 }
 function edit(mutator, focusTarget) {
   remember(); mutator(); focusSnapshot=null; changed(); renderInputs();
@@ -94,7 +95,7 @@ function replaceProject(next,data,saved=false) {
   $('check-announcement').textContent='';
   $('check-details').textContent='Check the current motion cycle and dimensions.';$('export').disabled=true;$('cursor').disabled=true;$('cursor').value=0;$('cursor-angle').value='0°';
   updateInspectionButton();
-  $('angle-equivalent').textContent='Exact slope; approximate angle shown after checking.';$('cursor-values').replaceChildren();$('profile').replaceChildren(svg('text',{x:260,y:210,'text-anchor':'middle'}));$('profile').firstChild.textContent='Check geometry to draw the profile.';$('displacement').replaceChildren();$('export-status').hidden=true;
+  $('angle-equivalent').textContent='Exact slope; approximate angle shown after checking.';$('cursor-values').replaceChildren();$('profile').replaceChildren(svg('text',{x:260,y:210,'text-anchor':'middle'}));$('profile').firstChild.textContent='Check geometry to draw the profile.';$('displacement').replaceChildren();$('export-status').hidden=true;invalidateGrid();
 }
 function approximate(value){const parts=String(value).split('/');return Number(parts[0])/(parts.length>1?Number(parts[1]):1);}
 function witnessText(item) {
@@ -183,9 +184,9 @@ async function setCursor(angle) {
 function download(blob,name){const url=URL.createObjectURL(blob),a=element('a',{href:url,download:name});document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);}
 async function validate(raw) {return(await request('/api/validate',{project},raw)).json();}
 $('check').addEventListener('click',async()=>{
-  if(checkBusy)return;const current=copy(project),expected=revision;checkBusy=true;$('check').disabled=true;$('check').textContent='Checking…';$('export').disabled=true;notice('');$('profile-status').textContent='Checking geometry…';$('profile-status').className='unknown';$('profile-witness').hidden=true;if(checked){$('stale').textContent='Checking · previous result';$('stale').hidden=false;}
+  if(checkBusy||gridOperation||exportBusy)return;const current=copy(project),expected=revision;checkBusy=true;$('check').disabled=true;$('check').textContent='Checking…';$('export').disabled=true;notice('');$('profile-status').textContent='Checking geometry…';$('profile-status').className='unknown';$('profile-witness').hidden=true;if(checked){$('stale').textContent='Checking · previous result';$('stale').hidden=false;}
   $('check-announcement').textContent='';
-  if(checked)checked.inspection_id=null;updateInspectionButton();
+  if(checked)checked.inspection_id=null;updateInspectionButton();gridControls();
   try{
     const data=await(await request('/api/check',{project:current})).json();
     if(expected!==revision){notice('Inputs changed during checking. Check the current draft.');return;}
@@ -193,7 +194,7 @@ $('check').addEventListener('click',async()=>{
     $('angle-equivalent').textContent=`≈ ${data.result.pressure_angle_limit_deg_approx.toFixed(3)}° (display only)`;
     $('export').disabled=data.result.status!=='pass';
     announceResult(data.result);
-  }catch(error){notice(error.message);$('profile-status').textContent=checked?`Stale · previous ${states[checked.result.status]}`:'Not checked';$('profile-status').className='unknown';if(checked){$('stale').textContent='Check failed · previous result';$('stale').hidden=false;}}finally{checkBusy=false;$('check').disabled=false;$('check').textContent='Check geometry';updateInspectionButton();}
+  }catch(error){notice(error.message);$('profile-status').textContent=checked?`Stale · previous ${states[checked.result.status]}`:'Not checked';$('profile-status').className='unknown';if(checked){$('stale').textContent='Check failed · previous result';$('stale').hidden=false;}}finally{checkBusy=false;$('check').disabled=false;$('check').textContent='Check geometry';updateInspectionButton();gridControls();}
 });
 $('cursor').addEventListener('input',()=>setCursor(Number($('cursor').value)));
 for(const id of ['profile','displacement'])$(id).addEventListener('pointerdown',event=>{
@@ -214,7 +215,7 @@ $('file').addEventListener('change',async()=>{
 });
 $('example').addEventListener('click',async()=>{if(dirty&&!confirm('Replace the current draft with the example? Save project first to keep it.'))return;const expected=revision;try{const data=await(await request('/api/example')).json();const valid=await(await request('/api/validate',{project:data.project??data})).json();if(expected!==revision){notice('Inputs changed while loading the example. Current draft retained.');return;}replaceProject(valid.project,valid.derived,true);notice('Example loaded.');}catch(error){notice(error.message);}});
 $('inspection').addEventListener('click',async()=>{
-  if(inspectionBusy||checkBusy||!checked?.inspection_id||checked.revision!==revision)return;
+  if(inspectionBusy||checkBusy||exportBusy||!!gridOperation||!checked?.inspection_id||checked.revision!==revision)return;
   const expected=revision,receipt=checked.inspection_id,current=copy(project),projectId=checked.project_id;
   inspectionBusy=true;updateInspectionButton();$('inspection').textContent='Saving inspection…';notice('');
   try{
@@ -226,10 +227,151 @@ $('inspection').addEventListener('click',async()=>{
   finally{inspectionBusy=false;$('inspection').textContent='Save inspection';updateInspectionButton();}
 });
 $('export').addEventListener('click',async()=>{
-  if(!checked||checked.revision!==revision||checked.result.status!=='pass')return;
-  const expected=revision;$('export').disabled=true;$('export').textContent='Bounding export…';$('export-status').hidden=true;notice('');
-  try{const response=await request('/api/export',{project:copy(project),project_id:checked.project_id});const blob=await response.blob();if(expected!==revision){notice('Inputs changed during export. No file downloaded. Check the current draft.');return;}download(blob,'camwright-profile.zip');$('export-status').textContent=`Export Pass · ${response.headers.get('X-Camwright-Vertices')} vertices · physical bound ${response.headers.get('X-Camwright-Cam-Bound-Mm')} mm · pitch bound ${response.headers.get('X-Camwright-Pitch-Bound-Mm')} mm. ZIP includes exact project and certificates.`;$('export-status').hidden=false;}catch(error){notice(error.message);$('export-status').textContent=`Export ${states[error.data?.status]||'refused'} · no geometry downloaded.`;$('export-status').hidden=false;}finally{$('export').textContent='Export profile ZIP';$('export').disabled=!checked||checked.revision!==revision||checked.result.status!=='pass';}
+  if(gridOperation||exportBusy||!checked||checked.revision!==revision||checked.result.status!=='pass')return;
+  exportBusy=true;gridControls();const expected=revision;$('export').disabled=true;$('export').textContent='Bounding export…';$('export-status').hidden=true;notice('');
+  try{const response=await request('/api/export',{project:copy(project),project_id:checked.project_id});const blob=await response.blob();if(expected!==revision){notice('Inputs changed during export. No file downloaded. Check the current draft.');return;}download(blob,'camwright-profile.zip');$('export-status').textContent=`Export Pass · ${response.headers.get('X-Camwright-Vertices')} vertices · CAD ${response.headers.get('X-Camwright-CAD-Status')||'not reported'} · physical bound ${response.headers.get('X-Camwright-Cam-Bound-Mm')} mm · pitch bound ${response.headers.get('X-Camwright-Pitch-Bound-Mm')} mm. ZIP includes exact project and certificates.`;$('export-status').hidden=false;}catch(error){notice(error.message);$('export-status').textContent=`Export ${states[error.data?.status]||'refused'} · no geometry downloaded.`;$('export-status').hidden=false;}finally{exportBusy=false;gridControls();$('export').textContent='Export profile ZIP';$('export').disabled=!checked||checked.revision!==revision||checked.result.status!=='pass';}
 });
 window.addEventListener('beforeunload',event=>{if(dirty){event.preventDefault();event.returnValue='';}});
 document.querySelectorAll('.inputs input,.inputs button,#save,#undo,#example').forEach(e=>e.disabled=true);
+function gridKey() {
+  return JSON.stringify([project,$('grid-bases').value,$('grid-rollers').value,$('grid-budget').value]);
+}
+function gridFresh() {
+  return !!gridReport && gridReportRevision===revision && gridReportEpoch===gridEpoch && gridReportKey===gridKey();
+}
+function gridControls() {
+  const busy=!!gridOperation||checkBusy||exportBusy;
+  $('check').disabled=busy||!project;
+  $('export').disabled=busy||!checked||checked.revision!==revision||checked.result.status!=='pass';
+  $('grid-explore').disabled=busy||!project;
+  $('grid-use').disabled=busy||!gridFresh()||!gridReport.selection;
+  $('grid-save').disabled=!!gridOperation||!gridReport;
+  $('grid-cancel').hidden=!gridOperation;
+  $('grid-cancel').disabled=!gridOperation||gridOperation.cancelRequested;
+  for(const button of $('grid-rows').querySelectorAll('button'))button.disabled=busy||!gridFresh();
+}
+function invalidateGrid() {
+  if(gridReport||gridOperation){
+    $('grid-context').hidden=false;
+    $('grid-context').textContent='Inputs changed. Any grid below belongs to the earlier motion, limits or radius lists.';
+    if(gridOperation)$('grid-status').textContent='Inputs changed while calculating. Waiting for earlier work to finish; no result will replace this draft.';
+  }
+  gridControls();
+}
+function gridFocusOwner(button) {
+  const owned=document.activeElement===button;
+  let moved=false;
+  const activity=()=>{moved=true;};
+  const focus=event=>{if(event.target!==button&&event.target!==document.body)moved=true;};
+  document.addEventListener?.('pointerdown',activity,true);
+  document.addEventListener?.('keydown',activity,true);
+  document.addEventListener?.('focusin',focus,true);
+  return target=>{
+    document.removeEventListener?.('pointerdown',activity,true);
+    document.removeEventListener?.('keydown',activity,true);
+    document.removeEventListener?.('focusin',focus,true);
+    if(target&&owned&&!moved&&document.hasFocus?.()&&[button,document.body].includes(document.activeElement))target.focus();
+  };
+}
+function currentGridOperation(op) {
+  return gridOperation===op&&op.revision===revision&&op.epoch===gridEpoch&&op.key===gridKey();
+}
+function beginGridOperation(button,kind) {
+  if(gridOperation||checkBusy||exportBusy||!project)return null;
+  const op={kind,revision,epoch:gridEpoch,key:gridKey(),source:copy(project),projectId:null,started:false,cancelRequested:false,cancelAccepted:false,finishFocus:gridFocusOwner(button)};
+  if(kind==='explore'&&gridReport){gridReportEpoch=-1;$('grid-context').hidden=false;$('grid-context').textContent='The previous grid is retained while a new calculation runs.';}
+  gridOperation=op;$('check').disabled=true;$('export').disabled=true;updateInspectionButton();gridControls();
+  return op;
+}
+function endGridOperation(op,target) {
+  if(gridOperation!==op){op.finishFocus(null);return;}
+  if(!currentGridOperation(op))$('grid-status').textContent='Earlier calculation finished. No result was applied to the edited inputs.';
+  gridOperation=null;
+  if(gridReport&&!gridFresh()){
+    $('grid-context').hidden=false;
+    $('grid-context').textContent='The previous grid is retained for reference. Explore the current inputs again before using a pair.';
+  }
+  $('check').disabled=checkBusy;
+  $('export').disabled=exportBusy||!checked||checked.revision!==revision||checked.result.status!=='pass';
+  updateInspectionButton();gridControls();op.finishFocus(target);
+}
+function renderGrid(report) {
+  $('grid-result').hidden=false;$('grid-rows').replaceChildren();
+  $('grid-summary').textContent=report.minimum_within_grid?'Minimum within this fully classified grid':report.selection?'Passing pair found · minimum not established':report.outcome==='no_pass_in_grid'?'No Pass in this grid':'No passing pair established';
+  const unresolved=report.candidates.filter(row=>row.status==='unknown').length;
+  $('grid-progress').textContent=`${report.evaluated} of ${report.total} pairs checked · ${report.status==='unfinished'?'Unfinished':'Complete'} · ${unresolved} unresolved. Only this declared grid and supported geometric model were inspected.`;
+  for(const row of report.candidates){
+    const action=element('td');
+    if(row.status==='pass'){
+      const button=element('button',{'aria-label':`Use base ${row.base_radius} mm and roller ${row.roller_radius} mm`},'Use pair');
+      button.addEventListener('click',()=>useGridPair(row,button));action.append(button);
+    }else action.textContent='Fresh Pass required';
+    $('grid-rows').append(element('tr',{},element('td',{},row.base_radius),element('td',{},row.roller_radius),element('td',{},row.zero_lift_pitch_radius_mm_exact),element('td',{class:row.status},states[row.status]||'Unresolved'),action));
+  }
+  gridControls();
+}
+async function exploreGrid() {
+  const op=beginGridOperation($('grid-explore'),'explore');if(!op)return;
+  let target=null;
+  $('grid-status').textContent='Validating the current source, then checking the finite radius grid…';
+  try{
+    const options={base_radii:$('grid-bases').value.split(',').map(x=>x.trim()),roller_radii:$('grid-rollers').value.split(',').map(x=>x.trim()),max_candidates:Number($('grid-budget').value)};
+    const valid=await(await request('/api/validate',{project:op.source})).json();op.projectId=valid.project_id;
+    if(!currentGridOperation(op))return;
+    if(op.cancelRequested){$('grid-status').textContent='Stopped before a calculation was started.';target=$('grid-explore');return;}
+    op.started=true;
+    const report=await(await request('/api/explore',{project:op.source,options})).json();
+    if(!currentGridOperation(op))return;
+    if(op.cancelRequested){$('grid-status').textContent='The request finished after Stop was requested. No result was applied.';target=$('grid-explore');return;}
+    if(!Array.isArray(report.candidates)||report.request?.source_project_id!==op.projectId)throw new Error('The grid result does not match its source. Try again.');
+    gridReport=report;gridReportRevision=revision;gridReportEpoch=gridEpoch;gridReportKey=op.key;
+    $('grid-context').hidden=false;$('grid-context').textContent='Grid matches the current motion, limits and radius lists. Each Use action runs a fresh geometric check.';
+    renderGrid(report);$('grid-status').textContent=`Grid check ${report.status==='unfinished'?'unfinished':'complete'}. ${report.evaluated} of ${report.total} pairs checked.`;
+    target=$('grid-summary');
+  }catch(error){
+    if(currentGridOperation(op)){
+      $('grid-status').textContent=op.cancelRequested&&error.data?.error?.code==='cancelled'?'Calculation cancelled by the server. No result applied.':error.message;
+      target=op.cancelRequested?$('grid-explore'):null;
+    }
+  }finally{endGridOperation(op,target);}
+}
+async function useGridPair(row,button) {
+  if(!gridFresh()||row.status!=='pass')return;
+  const op=beginGridOperation(button,'select');if(!op)return;
+  op.projectId=gridReport.request.source_project_id;let target=null;
+  $('grid-status').textContent='Freshly checking this radius pair before applying it…';
+  try{
+    op.started=true;
+    const req=gridReport.request;
+    const data=await(await request('/api/select',{project:op.source,project_id:op.projectId,options:{base_radii:req.base_radii,roller_radii:req.roller_radii,request_id:req.request_id,base_index:row.base_index,roller_index:row.roller_index}})).json();
+    if(!currentGridOperation(op))return;
+    if(op.cancelRequested){$('grid-status').textContent='The selection finished after Stop was requested. The draft was retained.';target=$('grid-explore');return;}
+    if(data.status!=='pass'||data.selection_rechecked!==true)throw new Error('A fresh geometric Pass is required before applying a pair.');
+    const valid=await(await request('/api/validate',{project:data.project})).json();
+    if(!currentGridOperation(op))return;
+    if(op.cancelRequested){$('grid-status').textContent='Selection stopped. The draft was retained.';target=$('grid-explore');return;}
+    replaceProject(valid.project,valid.derived);op.revision=revision;op.key=gridKey();
+    $('grid-status').textContent='Freshly rechecked pair applied to the editor. Run Check geometry for its profile, inspection and export.';
+    target=$('check');
+  }catch(error){if(currentGridOperation(op))$('grid-status').textContent=op.cancelRequested&&error.data?.error?.code==='cancelled'?'Calculation cancelled by the server. The draft was retained.':error.message;}
+  finally{endGridOperation(op,target);}
+}
+async function stopGrid() {
+  const op=gridOperation;if(!op||op.cancelRequested)return;
+  op.finishFocus(null);op.finishFocus=gridFocusOwner($('grid-cancel'));op.cancelRequested=true;gridControls();
+  if(!op.started){$('grid-status').textContent='Stopping before calculation starts…';return;}
+  $('grid-status').textContent='Requesting cancellation of this source’s active calculation…';
+  try{
+    const data=await(await request('/api/cancel',{project_id:op.projectId})).json();
+    if(!currentGridOperation(op))return;
+    op.cancelAccepted=data.cancelled===true;
+    $('grid-status').textContent=op.cancelAccepted?'Stop accepted. Waiting for the calculation response.':'No matching active calculation was stopped. Waiting for the request to finish.';
+  }catch(error){if(currentGridOperation(op))$('grid-status').textContent=`Stop could not be confirmed: ${error.message} Waiting for the calculation response.`;}
+}
+$('grid-bases').value||= '20,25,30';$('grid-rollers').value||='4,5,6';$('grid-budget').value||='64';
+for(const id of ['grid-bases','grid-rollers','grid-budget'])$(id).addEventListener('input',()=>{gridEpoch++;invalidateGrid();});
+$('grid-explore').addEventListener('click',exploreGrid);
+$('grid-cancel').addEventListener('click',stopGrid);
+$('grid-use').addEventListener('click',async()=>{if(!gridFresh()||!gridReport.selection)return;const row=gridReport.candidates.find(x=>x.base_index===gridReport.selection.base_index&&x.roller_index===gridReport.selection.roller_index);if(row)await useGridPair(row,$('grid-use'));});
+$('grid-save').addEventListener('click',()=>{if(gridReport&&!gridOperation)download(new Blob([JSON.stringify(gridReport,null,2)+'\n'],{type:'application/json'}),'camwright-grid.json');});
 (async()=>{try{const data=await(await request('/api/example')).json();const valid=await(await request('/api/validate',{project:data.project??data})).json();replaceProject(valid.project,valid.derived,true);$('check').click();}catch(error){notice(error.message);$('check').disabled=true;$('example').disabled=false;}})();

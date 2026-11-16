@@ -5,7 +5,7 @@
 <header><strong>Camwright</strong><span>In-line radial roller cam · 3-4-5 motion</span></header>
 <main>
 <div class="toolbar"><h1>Cam profile</h1><div class="actions"><button id="undo" disabled>Undo</button><button id="open">Open project</button><button id="save">Save project</button><button id="example">Example</button></div></div>
-<div class="first-run"><p><strong>Motion in. Cam profile out.</strong> The bundled cycle lifts a roller follower 20 mm. Its 25 mm base radius passes the geometry check; try 20 mm to expose the pressure limit.</p><nav aria-label="Workspace sections"><a href="#dimensions-heading">Edit motion &amp; dimensions</a><a href="#drawing-heading">Inspect profile</a><a href="#results-heading">Read checks</a></nav></div>
+<div class="first-run"><p><strong>Motion in. Cam profile out.</strong> The bundled cycle lifts a roller follower 20 mm. Its 25 mm base radius passes the geometry check; try 20 mm to expose the pressure limit.</p><nav aria-label="Workspace sections"><a href="#dimensions-heading">Edit motion &amp; dimensions</a><a href="#drawing-heading">Inspect profile</a><a href="#results-heading">Read checks</a><a href="#sizing-heading">Explore radius pairs</a></nav></div>
 <p id="notice" role="status" aria-live="polite" hidden></p>
 <p id="check-announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
 <div class="workspace">
@@ -18,6 +18,7 @@
 <label>Export deviation (mm)<input id="tolerance" type="text" inputmode="decimal" maxlength="32"><span class="hint">Maximum continuous-curve deviation.</span></label>
 </div>
 <h2>Motion cycle</h2>
+<p class="narrow-scroll-hint">Scroll the table sideways to reorder or remove segments.</p>
 <div class="table-scroll" tabindex="0" role="region" aria-label="Motion segments. Scroll horizontally on narrow screens."><table><thead><tr><th>Segment</th><th>Span (°)</th><th>End lift (mm)</th><th>Start (°)</th><th>Motion</th><th><span class="sr-only">Reorder or remove</span></th></tr></thead><tbody id="segments"></tbody></table></div>
 <div class="motion-actions"><button id="add">Add segment</button><span id="cycle-total" class="hint"></span></div>
 <p class="hint">Positive spans, exactly 360°, final lift 0 mm. Fixed-decimal inputs; no scientific notation.</p>
@@ -30,13 +31,28 @@
 <div class="legend"><span><i class="solid"></i>Physical cam</span><span><i class="dashed"></i>Pitch curve / roller center</span></div>
 <svg id="profile" viewBox="0 0 520 420" role="img" aria-label="Physical cam and pitch curve profile"><text x="260" y="210" text-anchor="middle">Check geometry to draw the profile.</text></svg>
 <div class="plot-heading"><h2>Displacement</h2><span class="hint">Lift (mm) / angle (°)</span></div>
-<svg id="displacement" viewBox="0 0 520 190" role="img" aria-label="Follower displacement versus angle"></svg>
+<p class="narrow-scroll-hint">Scroll the chart sideways to see the full cycle.</p>
+<div class="displacement-scroll" tabindex="0" role="region" aria-label="Follower displacement chart. Scroll horizontally on narrow screens."><svg id="displacement" viewBox="0 0 520 190" role="img" aria-label="Follower displacement versus angle"></svg></div>
 <label class="cursor-label">Angle cursor (°)<input id="cursor" type="range" min="0" max="360" step="1" value="0" disabled><output id="cursor-angle">0°</output></label>
 <div id="cursor-values" class="cursor-values"></div>
 <p class="hint">Pitch follows the roller center; the physical cam is offset by the roller radius along the normal. Preview lines are visual samples.</p>
 </section>
 </div>
 <section id="results" class="results" aria-labelledby="results-heading"><div class="result-title"><h2 id="results-heading" tabindex="-1">Geometric checks</h2><strong id="overall">Not checked</strong><span id="stale" hidden>Inputs changed · previous result</span></div><div id="check-details">Check the current motion cycle and dimensions.</div><p id="export-status" hidden></p></section>
+<section class="sizing" aria-labelledby="sizing-heading">
+<h2 id="sizing-heading" tabindex="-1">Explore radius pairs</h2>
+<p class="hint">Keep this motion cycle and its limits. Check a declared grid of base and roller radii, then freshly recheck a passing pair before applying it to the editor.</p>
+<div class="sizing-inputs">
+<label>Base radii (mm)<input id="grid-bases" type="text" value="20,25,30" maxlength="527" aria-describedby="grid-help"></label>
+<label>Roller radii (mm)<input id="grid-rollers" type="text" value="4,5,6" maxlength="527" aria-describedby="grid-help"></label>
+<label>Candidate budget<input id="grid-budget" type="number" value="64" min="1" max="64" step="1" aria-describedby="grid-help"></label>
+</div>
+<p id="grid-help" class="hint">Comma-separated fixed-decimal radii; 1–16 distinct positive values per list, at most 64 pairs. A lower budget can leave the grid unfinished. The objective is zero-lift pitch radius (base + roller), not strength, wear or a global physical optimum.</p>
+<div class="sizing-actions"><button id="grid-explore">Explore grid</button><button id="grid-cancel" hidden>Stop calculation</button><button id="grid-use" disabled>Use first passing pair</button><button id="grid-save" disabled>Save grid JSON</button></div>
+<p id="grid-status" role="status" aria-live="polite">No radius grid checked.</p>
+<p id="grid-context" class="hint" hidden></p>
+<div id="grid-result" hidden><h3 id="grid-summary" tabindex="-1"></h3><p id="grid-progress" class="hint"></p><p id="grid-scroll" class="narrow-scroll-hint">Scroll the radius table sideways to inspect all columns.</p><div class="table-scroll" tabindex="0" role="region" aria-label="Finite radius candidates" aria-describedby="grid-scroll"><table class="sizing-table"><thead><tr><th scope="col">Base (mm)</th><th scope="col">Roller (mm)</th><th scope="col">Pitch radius (mm, exact)</th><th scope="col">Geometry</th><th scope="col">Use pair</th></tr></thead><tbody id="grid-rows"></tbody></table></div></div>
+</section>
 <footer>Geometric model only. Dynamics, stress, tool compensation and manufacturing fit are outside this check.</footer>
 </main>
 <input id="file" type="file" accept=".json,application/json" hidden>

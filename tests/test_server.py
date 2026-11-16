@@ -37,6 +37,14 @@ class ServerTests(unittest.TestCase):
         connection.close()
         return result
 
+    def test_health_binds_package_identity_without_project_or_filesystem_data(self):
+        from camwright import __version__
+        status, _, raw = self.request("GET", "/api/health")
+        self.assertEqual(200, status)
+        self.assertEqual({"service": "Camwright", "implementation_version": __version__,
+                          "model": "inline-roller-345-convex", "units": "mm", "local_only": True}, json.loads(raw))
+        self.assertEqual(403, self.request("GET", "/api/health", headers={"Host": "attacker.test"})[0])
+
     def test_host_origin_content_type_path_and_size_guards(self):
         for method,path,payload,headers,expected in [
             ("GET","/",None,{"Host":"attacker.test"},403),

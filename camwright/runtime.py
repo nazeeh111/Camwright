@@ -42,13 +42,13 @@ class Calculator:
         except ValueError as error:
             return refused("output_limit", str(error))
 
-    def run(self, operation, project, project_id=None):
+    def run(self, operation, project, project_id=None, options=None):
         if not self.slot.acquire(blocking=False):
             return refused("busy", "A calculation is already running")
         child = None
         try:
             payload = json.dumps({"operation": operation, "project": project,
-                                  "project_id": project_id}, separators=(",", ":")).encode()
+                                  "project_id": project_id, **({"options": options} if options is not None else {})}, separators=(",", ":")).encode()
             project = json.loads(payload)["project"]
             with self.lock:
                 if self.closed:
