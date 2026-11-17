@@ -1,0 +1,35 @@
+{
+  "cadquery": "2.6.1",
+  "ezdxf": "1.4.5",
+  "scope": "Native planar synthetic geometry readback only; no machining or loading validation",
+  "files": [
+    {
+      "file": "cam.dxf",
+      "sha256": "1cc1f8722bcda1adccf6f5d1caa2aa801ecf356ed04e55555f3910173b756bab",
+      "units": "mm",
+      "closed": true,
+      "dxfVerticesExactlyCSVWithoutDuplicateEndpoint": 260,
+      "nativeCADValid": true,
+      "nativeCADShape": "Face",
+      "bounds_mm": [
+        70.0,
+        73.55061393956301,
+        0.0
+      ]
+    },
+    {
+      "file": "pitch.dxf",
+      "sha256": "2e19ae556b908766ca48888ef3aa7ab21b0479de9dfe0c19b78af0e357c6f81e",
+      "units": "mm",
+      "closed": true,
+      "dxfVerticesExactlyCSVWithoutDuplicateEndpoint": 260,
+      "nativeCADValid": true,
+      "nativeCADShape": "Face",
+      "bounds_mm": [
+        78.0,
+        81.550520469806,
+        0.0
+      ]
+    }
+  ]
+}

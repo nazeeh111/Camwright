@@ -1,0 +1,170 @@
+{
+  "schema": "camwright.inspection",
+  "version": 1,
+  "inspection_id": "525f279ce497c9e4852802c637b1be1a",
+  "project_id": "dbd6ae7b663f685ad747221e4fc73d45b1d1cd79d794e6a3ea78b668ba6ab83d",
+  "completed_at_utc": "2026-11-17T10:34:31.905989+00:00",
+  "implementation_version": "0.2.2.dev0",
+  "check_limits": {
+    "interval_budget_per_condition": 2048,
+    "maximum_subdivision_depth": 24
+  },
+  "worker_deadline_seconds": 30,
+  "model": "inline-roller-345-convex",
+  "units": "mm",
+  "angle_units": "degrees",
+  "project": {
+    "schema": "camwright.project",
+    "version": 1,
+    "units": "mm",
+    "angle_units": "degrees",
+    "model": "inline-roller-345-convex",
+    "base_radius": "20",
+    "roller_radius": "5",
+    "maximum_pressure_slope": "0.5",
+    "segments": [
+      {
+        "span_deg": "120",
+        "end_mm": "20"
+      },
+      {
+        "span_deg": "60",
+        "end_mm": "20"
+      },
+      {
+        "span_deg": "120",
+        "end_mm": "0"
+      },
+      {
+        "span_deg": "60",
+        "end_mm": "0"
+      }
+    ],
+    "tolerance_mm": "0.01"
+  },
+  "result": {
+    "status": "fail",
+    "model": "convex in-line radial roller cam; 3-4-5 motion",
+    "pressure_angle_limit_deg_approx": 26.565051177077994,
+    "segments": [
+      {
+        "segment": 0,
+        "checks": {
+          "pressure": {
+            "status": "fail",
+            "u": "1/2",
+            "value": [
+              "-387919735044042319790598553716604240550103341450311813028157425535561993737170161979924338541787633650338980377133505973401739545543793775/27058080842778454787900092413529196391227778153404893225917077017441560964327607634351267465985999563590729859993033449882769830055367204",
+              "-387919735044042319790598553716559509670328596152053233594047840426623517174670161979924338541787633650338980377133505973401739545543793775/27058080842778454787900092413529196391227778153404893225917077017441560964327607634351267465985999563590729859993033449882769830055367204"
+            ],
+            "boxes": 1,
+            "angle_deg": "60"
+          },
+          "convex_pitch": {
+            "status": "pass",
+            "boxes": 5
+          },
+          "roller_curvature": {
+            "status": "pass",
+            "boxes": 1
+          }
+        }
+      },
+      {
+        "segment": 1,
+        "checks": {
+          "pressure": {
+            "status": "pass",
+            "boxes": 1
+          },
+          "convex_pitch": {
+            "status": "pass",
+            "boxes": 1
+          },
+          "roller_curvature": {
+            "status": "pass",
+            "boxes": 1
+          }
+        }
+      },
+      {
+        "segment": 2,
+        "checks": {
+          "pressure": {
+            "status": "fail",
+            "u": "1/2",
+            "value": [
+              "-387919735044042319790598553716604240550103341450311813028157425535561993737170161979924338541787633650338980377133505973401739545543793775/27058080842778454787900092413529196391227778153404893225917077017441560964327607634351267465985999563590729859993033449882769830055367204",
+              "-387919735044042319790598553716559509670328596152053233594047840426623517174670161979924338541787633650338980377133505973401739545543793775/27058080842778454787900092413529196391227778153404893225917077017441560964327607634351267465985999563590729859993033449882769830055367204"
+            ],
+            "boxes": 1,
+            "angle_deg": "240"
+          },
+          "convex_pitch": {
+            "status": "pass",
+            "boxes": 5
+          },
+          "roller_curvature": {
+            "status": "pass",
+            "boxes": 1
+          }
+        }
+      },
+      {
+        "segment": 3,
+        "checks": {
+          "pressure": {
+            "status": "pass",
+            "boxes": 1
+          },
+          "convex_pitch": {
+            "status": "pass",
+            "boxes": 1
+          },
+          "roller_curvature": {
+            "status": "pass",
+            "boxes": 1
+          }
+        }
+      }
+    ]
+  },
+  "derived": {
+    "total_deg_exact": "360",
+    "remaining_deg_exact": "0",
+    "segments": [
+      {
+        "segment": 0,
+        "start_deg_exact": "0",
+        "end_deg_exact": "120",
+        "start_mm_exact": "0",
+        "end_mm_exact": "20",
+        "motion": "rise"
+      },
+      {
+        "segment": 1,
+        "start_deg_exact": "120",
+        "end_deg_exact": "180",
+        "start_mm_exact": "20",
+        "end_mm_exact": "20",
+        "motion": "dwell"
+      },
+      {
+        "segment": 2,
+        "start_deg_exact": "180",
+        "end_deg_exact": "300",
+        "start_mm_exact": "20",
+        "end_mm_exact": "0",
+        "motion": "return"
+      },
+      {
+        "segment": 3,
+        "start_deg_exact": "300",
+        "end_deg_exact": "360",
+        "start_mm_exact": "0",
+        "end_mm_exact": "0",
+        "motion": "dwell"
+      }
+    ]
+  }
+}

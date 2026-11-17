@@ -1,0 +1,4 @@
+
+# Preserve native exported coordinate CSV bytes and their bound evidence hashes.
+docs/presentation/cam.csv -text -eol
+docs/presentation/pitch.csv -text -eol

@@ -1,0 +1,18 @@
+{
+  "failedInspectionHasOnlyJSONAndHTML": true,
+  "failedInspectionStatus": "fail",
+  "UIAndCLIProjectExact": true,
+  "everyUIAndCLINativeArchiveMemberExact": {
+    "cam.csv": true,
+    "cam.svg": true,
+    "pitch.csv": true,
+    "pitch.svg": true,
+    "export.json": true,
+    "cam.dxf": true,
+    "pitch.dxf": true,
+    "checks.json": true,
+    "camwright-project.json": true
+  },
+  "verticesIncludingClosingDuplicate": 261,
+  "dxfVerticesClosedFlag": 260
+}

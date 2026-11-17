@@ -6,9 +6,21 @@
 
 <p align="center"><a href="#run-locally">Run locally</a> · <a href="#check-the-bundled-cam">Try the bundled cam</a> · <a href="#explore-in-the-workbench">Explore radius pairs</a> · <a href="https://github.com/nazeeh111/Camwright/releases/latest">Download latest release</a></p>
 
+<picture>
+  <source media="(max-width: 600px)" srcset="docs/presentation/inspection-to-profile-mobile.png">
+  <img src="docs/presentation/inspection-to-profile.png" alt="Actual failed 20/5 mm check, all nine radius-pair classifications, and the selected 25/4 mm native profile. Inspection survives Fail; geometry requires a fresh Pass. Every emitted vertex is drawn at equal spatial scale." width="100%">
+</picture>
+
+**Keep the failed check. Export the checked curve.** Save the exact 60° cam-angle witness, classify nine radius pairs, then reopen the checked profile in native CAD. [Follow the real workbench/CLI journey and inspect the complete artifacts](docs/presentation/README.md).
+
+<details>
+<summary>Earlier recorded workspace</summary>
+
 ![Camwright with a failed pressure check, inspection saving enabled and geometry export disabled](docs/workspace.jpg)
 
-The recorded 20 mm example above fails the pressure check at a 60° witness. Its inspection can still be saved; profile export is disabled.
+The recorded 20 mm example fails the pressure check at a 60° cam-angle witness. Its inspection can still be saved; profile export is disabled.
+
+</details>
 
 Current source is the unreleased **0.2.2.dev0** generation. Historical release assets and saved results retain their original implementation identities.
 
@@ -91,7 +103,7 @@ camwright replay profile.zip
 ```
 
 The declared nine-cell example rejects all20mm base candidates and selects
-base25/roller4: zero-lift pitch radius29mm versus the original30mm. The objective
+base 25 / roller 4: zero-lift pitch radius 29 mm versus the original30 mm. The objective
 is this geometric pitch radius, not physical strength, wear or a universal
 minimum. `--max-candidates` can stop exploration explicitly unfinished; unknown
 checks never become Pass. Read `minimum_within_grid` separately from the presence
@@ -108,7 +120,7 @@ marking CAD unavailable. See the [API and format contract](docs/api.md).
 
 CLI `check` and a fully classified exploration exit0 even when their returned
 geometric status is Fail/Unknown; inspect the result, not the process code, for
-feasibility. Export/selection refusal or unfinished exploration exits3. Invalid
+feasibility. Export/selection refusal or unfinished exploration exits 3. Invalid
 input, I/O/collision and replay mismatch exit2. No file is replaced. Export may
 write a complete CSV/SVG-only archive and exit3 when CAD is unavailable. Replay
 uses bounded in-memory ZIP admission, extracts no files, and freshly recomputes

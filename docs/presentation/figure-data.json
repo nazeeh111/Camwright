@@ -1,0 +1,53 @@
+{
+  "case": "finite9",
+  "views": [
+    {
+      "figure": "desktop",
+      "mmToScreenScale": 4.609756097560975,
+      "lo_mm": [
+        -49.0,
+        -33.936757695704
+      ],
+      "hi_mm": [
+        33.0,
+        47.613762774102
+      ],
+      "origin": [
+        837.0,
+        276.03599550252034
+      ],
+      "screenYUsesMinusWorldY": true,
+      "all261VerticesPerCurve": true
+    },
+    {
+      "figure": "phone",
+      "mmToScreenScale": 3.6664388930626686,
+      "lo_mm": [
+        -49.0,
+        -33.936757695704
+      ],
+      "hi_mm": [
+        33.0,
+        47.613762774102
+      ],
+      "origin": [
+        59.676005384430596,
+        954.0
+      ],
+      "screenYUsesMinusWorldY": true,
+      "all261VerticesPerCurve": true
+    }
+  ],
+  "camVertices": 261,
+  "pitchVertices": 261,
+  "rollerRadius_mm": 4.0,
+  "firstContact_mm": [
+    25.0,
+    0.0
+  ],
+  "rollerCentre_mm": [
+    29.0,
+    0.0
+  ],
+  "failedCamAngle_deg": "60"
+}

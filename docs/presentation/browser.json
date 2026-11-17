@@ -1,0 +1,18 @@
+{
+  "keyboardCheck": true,
+  "failedExportBlocked": true,
+  "failedInspectionSaved": true,
+  "exactWitnessAngle": 60,
+  "ninePairGrid": true,
+  "selectedBase": "25",
+  "selectedRoller": "4",
+  "freshReopenRequiresCheck": true,
+  "freshReopenPass": true,
+  "invalidImportPreservesValidDraftAndExport": true,
+  "editDisablesStaleArtifacts": true,
+  "viewport": {
+    "width": 390,
+    "scroll": 390
+  },
+  "errors": []
+}
