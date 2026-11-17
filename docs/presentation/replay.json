@@ -1,0 +1,16 @@
+{
+  "status": "verified-replay",
+  "project_id": "8c27bdac2ef0a0c934e8dbcd27a8cf27107c1049ecca913b4197e076e7dde094",
+  "files": [
+    "cam.csv",
+    "cam.dxf",
+    "cam.svg",
+    "camwright-project.json",
+    "checks.json",
+    "export.json",
+    "pitch.csv",
+    "pitch.dxf",
+    "pitch.svg"
+  ],
+  "scope": "Current implementation and supported geometric model only; not fabrication approval."
+}

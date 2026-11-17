@@ -1,0 +1,19 @@
+{
+  "source_commit": "b34a6a84089a72beb999830862e5712d26070540",
+  "source_tree": "76f8b061e5936ccf3b94395f285bc7aba3e22711",
+  "encoding": "All261vertices per emitted curve; one equal physical mm-to-screen scale; every9grid outcome retained; roller at0degrees",
+  "files": {
+    "failed-check.json": "2f73249b5ade774eb4f6b4c5262d9725c86ea6e57b2977ac572820b6cca8eb60",
+    "radius-grid.json": "66a1b76f025851743869c5cf2c4eb7486774bce151d9f1dc47bbe4561158ae50",
+    "selected-project.json": "ce337b8ff3dc66abafed653e6f8aaf2a3f114067850875ff59adad2f1393ae75",
+    "export.json": "79b196f6745523063411339a9e69a760c9f981f5cf6364ea4e5df087660f2903",
+    "cam.csv": "f65f9aaba5d26801b1aed7cc36444157fd347cb178e5cb1f09a344737b01fac0",
+    "pitch.csv": "d108d43d385aeff85f1f61b5c6fe9e7a2d1072fc6eb051b81418459dd25e5c2c",
+    "figure.py": "a75c4c960a2e42d32cd079cb9760ca644bac270a3f91197e2497b5158fa37103",
+    "figure-data.json": "ea9872e7fb2b2269f30df64bd8fe8a01faf1dff6450d3538a24008dfc0301861",
+    "inspection-to-profile.svg": "28c1f04dce7865e82c50b94e493f7300dd6d5a4accaa2c134d387649760d6e49",
+    "inspection-to-profile-mobile.svg": "2ccabf2ef6b2bd3c5279c158d5c29c137f358d11e4133d0762122c66ac8917a4",
+    "inspection-to-profile.png": "0fb5682d45a651dee57677fd5285a70c1944fd5154da5344d66ff1ea6875fd76",
+    "inspection-to-profile-mobile.png": "6f023a1dbd3c1c0d0c45960aadd5195b13df92e6b2e4dede832814c1ef741885"
+  }
+}

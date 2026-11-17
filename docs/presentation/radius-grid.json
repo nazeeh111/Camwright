@@ -1,0 +1,862 @@
+{
+  "schema": "camwright.sizing-result",
+  "version": 1,
+  "request": {
+    "schema": "camwright.sizing",
+    "version": 1,
+    "source_project_id": "f69a2799b9014366ad4a0a676c99cf655e9e5458edbf24c1449d5fde8473bc85",
+    "project": {
+      "schema": "camwright.project",
+      "version": 1,
+      "units": "mm",
+      "angle_units": "degrees",
+      "model": "inline-roller-345-convex",
+      "base_radius": "25",
+      "roller_radius": "5",
+      "maximum_pressure_slope": "0.5",
+      "segments": [
+        {
+          "span_deg": "120",
+          "end_mm": "20"
+        },
+        {
+          "span_deg": "60",
+          "end_mm": "20"
+        },
+        {
+          "span_deg": "120",
+          "end_mm": "0"
+        },
+        {
+          "span_deg": "60",
+          "end_mm": "0"
+        }
+      ],
+      "tolerance_mm": "0.01"
+    },
+    "base_radii": [
+      "20",
+      "25",
+      "30"
+    ],
+    "roller_radii": [
+      "4",
+      "5",
+      "6"
+    ],
+    "objective": "minimum_zero_lift_pitch_radius_then_base_then_roller",
+    "request_id": "b4a4ffd8906231bc4ecafebcadeb6a1ce91b90cf62f8fb978a2d8d5a97fa7456"
+  },
+  "complete": true,
+  "status": "complete",
+  "reason": null,
+  "outcome": "passing_candidate",
+  "minimum_within_grid": true,
+  "selection": {
+    "base_index": 1,
+    "roller_index": 0,
+    "project_id": "8c27bdac2ef0a0c934e8dbcd27a8cf27107c1049ecca913b4197e076e7dde094"
+  },
+  "candidates": [
+    {
+      "base_index": 0,
+      "roller_index": 0,
+      "base_radius": "20",
+      "roller_radius": "4",
+      "zero_lift_pitch_radius_mm_exact": "24",
+      "project_id": "2d2207f1465e0ce35d82935b9e259c22b762753464b1f1c264b0a9b9b5069fa9",
+      "status": "fail",
+      "result": {
+        "status": "fail",
+        "model": "convex in-line radial roller cam; 3-4-5 motion",
+        "pressure_angle_limit_deg_approx": 26.565051177077994,
+        "segments": [
+          {
+            "segment": 0,
+            "checks": {
+              "pressure": {
+                "status": "fail",
+                "u": "1/2",
+                "value": [
+                  "-213667907395492666220468786962495719574695628649136555293806751021607230092955348418120925582511531530569767615503333245969879778499719511/6764520210694613696975023103382299097806944538351223306479269254360390241081901908587816866496499890897682464998258362470692457513841801",
+                  "-213667907395492666220468786962484536854751942324571910435279354744372610952330348418120925582511531530569767615503333245969879778499719511/6764520210694613696975023103382299097806944538351223306479269254360390241081901908587816866496499890897682464998258362470692457513841801"
+                ],
+                "boxes": 1,
+                "angle_deg": "60"
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 5
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          },
+          {
+            "segment": 1,
+            "checks": {
+              "pressure": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          },
+          {
+            "segment": 2,
+            "checks": {
+              "pressure": {
+                "status": "fail",
+                "u": "1/2",
+                "value": [
+                  "-213667907395492666220468786962495719574695628649136555293806751021607230092955348418120925582511531530569767615503333245969879778499719511/6764520210694613696975023103382299097806944538351223306479269254360390241081901908587816866496499890897682464998258362470692457513841801",
+                  "-213667907395492666220468786962484536854751942324571910435279354744372610952330348418120925582511531530569767615503333245969879778499719511/6764520210694613696975023103382299097806944538351223306479269254360390241081901908587816866496499890897682464998258362470692457513841801"
+                ],
+                "boxes": 1,
+                "angle_deg": "240"
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 5
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          },
+          {
+            "segment": 3,
+            "checks": {
+              "pressure": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "base_index": 0,
+      "roller_index": 1,
+      "base_radius": "20",
+      "roller_radius": "5",
+      "zero_lift_pitch_radius_mm_exact": "25",
+      "project_id": "dbd6ae7b663f685ad747221e4fc73d45b1d1cd79d794e6a3ea78b668ba6ab83d",
+      "status": "fail",
+      "result": {
+        "status": "fail",
+        "model": "convex in-line radial roller cam; 3-4-5 motion",
+        "pressure_angle_limit_deg_approx": 26.565051177077994,
+        "segments": [
+          {
+            "segment": 0,
+            "checks": {
+              "pressure": {
+                "status": "fail",
+                "u": "1/2",
+                "value": [
+                  "-387919735044042319790598553716604240550103341450311813028157425535561993737170161979924338541787633650338980377133505973401739545543793775/27058080842778454787900092413529196391227778153404893225917077017441560964327607634351267465985999563590729859993033449882769830055367204",
+                  "-387919735044042319790598553716559509670328596152053233594047840426623517174670161979924338541787633650338980377133505973401739545543793775/27058080842778454787900092413529196391227778153404893225917077017441560964327607634351267465985999563590729859993033449882769830055367204"
+                ],
+                "boxes": 1,
+                "angle_deg": "60"
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 5
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          },
+          {
+            "segment": 1,
+            "checks": {
+              "pressure": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          },
+          {
+            "segment": 2,
+            "checks": {
+              "pressure": {
+                "status": "fail",
+                "u": "1/2",
+                "value": [
+                  "-387919735044042319790598553716604240550103341450311813028157425535561993737170161979924338541787633650338980377133505973401739545543793775/27058080842778454787900092413529196391227778153404893225917077017441560964327607634351267465985999563590729859993033449882769830055367204",
+                  "-387919735044042319790598553716559509670328596152053233594047840426623517174670161979924338541787633650338980377133505973401739545543793775/27058080842778454787900092413529196391227778153404893225917077017441560964327607634351267465985999563590729859993033449882769830055367204"
+                ],
+                "boxes": 1,
+                "angle_deg": "240"
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 5
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          },
+          {
+            "segment": 3,
+            "checks": {
+              "pressure": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "base_index": 0,
+      "roller_index": 2,
+      "base_radius": "20",
+      "roller_radius": "6",
+      "zero_lift_pitch_radius_mm_exact": "26",
+      "project_id": "c562a448689cdccda02ef2e1d65990a6cbd6b8b87442a4507588912594690e56",
+      "status": "fail",
+      "result": {
+        "status": "fail",
+        "model": "convex in-line radial roller cam; 3-4-5 motion",
+        "pressure_angle_limit_deg_approx": 26.565051177077994,
+        "segments": [
+          {
+            "segment": 0,
+            "checks": {
+              "pressure": {
+                "status": "fail",
+                "u": "7/16",
+                "value": [
+                  "-165258343096494521419187193877213622885011748240282931147779205759274511952890239272101266258074708583105825715634448076396261887956319293491275079/9486822229572047435709837831141682158488532935152431628709043705944875586365493666894581219800706981183057720607407139190249098284349388608241664",
+                  "-165258343096494521419187193877205868813501148428155465558921686542545358735890239272101266258074708583105825715634448076396261887956319293491275079/9486822229572047435709837831141682158488532935152431628709043705944875586365493666894581219800706981183057720607407139190249098284349388608241664"
+                ],
+                "boxes": 6,
+                "angle_deg": "105/2"
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 5
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          },
+          {
+            "segment": 1,
+            "checks": {
+              "pressure": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          },
+          {
+            "segment": 2,
+            "checks": {
+              "pressure": {
+                "status": "fail",
+                "u": "9/16",
+                "value": [
+                  "-8097658811728231549540172499984002186865916842208529706146747140159390152187621724332962046645660720572185460066087955743416832509859645381072478871/464854289249030324349782053725942425765938113822469149806743141591298903731909189677834479770234642077969828309762949820322205815933120041803841536",
+                  "-8097658811728231549540172499982552906361215094544951732481596582629783511562621724332962046645660720572185460066087955743416832509859645381072478871/464854289249030324349782053725942425765938113822469149806743141591298903731909189677834479770234642077969828309762949820322205815933120041803841536"
+                ],
+                "boxes": 5,
+                "angle_deg": "495/2"
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 5
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          },
+          {
+            "segment": 3,
+            "checks": {
+              "pressure": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "base_index": 1,
+      "roller_index": 0,
+      "base_radius": "25",
+      "roller_radius": "4",
+      "zero_lift_pitch_radius_mm_exact": "29",
+      "project_id": "8c27bdac2ef0a0c934e8dbcd27a8cf27107c1049ecca913b4197e076e7dde094",
+      "status": "pass",
+      "result": {
+        "status": "pass",
+        "model": "convex in-line radial roller cam; 3-4-5 motion",
+        "pressure_angle_limit_deg_approx": 26.565051177077994,
+        "segments": [
+          {
+            "segment": 0,
+            "checks": {
+              "pressure": {
+                "status": "pass",
+                "boxes": 3
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 3
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          },
+          {
+            "segment": 1,
+            "checks": {
+              "pressure": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          },
+          {
+            "segment": 2,
+            "checks": {
+              "pressure": {
+                "status": "pass",
+                "boxes": 3
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 3
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          },
+          {
+            "segment": 3,
+            "checks": {
+              "pressure": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "base_index": 1,
+      "roller_index": 1,
+      "base_radius": "25",
+      "roller_radius": "5",
+      "zero_lift_pitch_radius_mm_exact": "30",
+      "project_id": "f69a2799b9014366ad4a0a676c99cf655e9e5458edbf24c1449d5fde8473bc85",
+      "status": "pass",
+      "result": {
+        "status": "pass",
+        "model": "convex in-line radial roller cam; 3-4-5 motion",
+        "pressure_angle_limit_deg_approx": 26.565051177077994,
+        "segments": [
+          {
+            "segment": 0,
+            "checks": {
+              "pressure": {
+                "status": "pass",
+                "boxes": 3
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 3
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          },
+          {
+            "segment": 1,
+            "checks": {
+              "pressure": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          },
+          {
+            "segment": 2,
+            "checks": {
+              "pressure": {
+                "status": "pass",
+                "boxes": 3
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 3
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          },
+          {
+            "segment": 3,
+            "checks": {
+              "pressure": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "base_index": 1,
+      "roller_index": 2,
+      "base_radius": "25",
+      "roller_radius": "6",
+      "zero_lift_pitch_radius_mm_exact": "31",
+      "project_id": "9ca6926d3e33c677642226d0a7fcb2a564cad1a3fa9e40330c655057203e821b",
+      "status": "pass",
+      "result": {
+        "status": "pass",
+        "model": "convex in-line radial roller cam; 3-4-5 motion",
+        "pressure_angle_limit_deg_approx": 26.565051177077994,
+        "segments": [
+          {
+            "segment": 0,
+            "checks": {
+              "pressure": {
+                "status": "pass",
+                "boxes": 3
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 3
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          },
+          {
+            "segment": 1,
+            "checks": {
+              "pressure": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          },
+          {
+            "segment": 2,
+            "checks": {
+              "pressure": {
+                "status": "pass",
+                "boxes": 3
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 3
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          },
+          {
+            "segment": 3,
+            "checks": {
+              "pressure": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "base_index": 2,
+      "roller_index": 0,
+      "base_radius": "30",
+      "roller_radius": "4",
+      "zero_lift_pitch_radius_mm_exact": "34",
+      "project_id": "f76eabd17c2a1b7b2cd42bb970b6e4737ffadef771a3161e59cde2b61ef2d119",
+      "status": "pass",
+      "result": {
+        "status": "pass",
+        "model": "convex in-line radial roller cam; 3-4-5 motion",
+        "pressure_angle_limit_deg_approx": 26.565051177077994,
+        "segments": [
+          {
+            "segment": 0,
+            "checks": {
+              "pressure": {
+                "status": "pass",
+                "boxes": 3
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 3
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          },
+          {
+            "segment": 1,
+            "checks": {
+              "pressure": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          },
+          {
+            "segment": 2,
+            "checks": {
+              "pressure": {
+                "status": "pass",
+                "boxes": 3
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 3
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          },
+          {
+            "segment": 3,
+            "checks": {
+              "pressure": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "base_index": 2,
+      "roller_index": 1,
+      "base_radius": "30",
+      "roller_radius": "5",
+      "zero_lift_pitch_radius_mm_exact": "35",
+      "project_id": "dc5e524e503339dfd47c3a920fa450a6342b54a2053c3e4558e0438265f24c5c",
+      "status": "pass",
+      "result": {
+        "status": "pass",
+        "model": "convex in-line radial roller cam; 3-4-5 motion",
+        "pressure_angle_limit_deg_approx": 26.565051177077994,
+        "segments": [
+          {
+            "segment": 0,
+            "checks": {
+              "pressure": {
+                "status": "pass",
+                "boxes": 3
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 3
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          },
+          {
+            "segment": 1,
+            "checks": {
+              "pressure": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          },
+          {
+            "segment": 2,
+            "checks": {
+              "pressure": {
+                "status": "pass",
+                "boxes": 3
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 3
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          },
+          {
+            "segment": 3,
+            "checks": {
+              "pressure": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "base_index": 2,
+      "roller_index": 2,
+      "base_radius": "30",
+      "roller_radius": "6",
+      "zero_lift_pitch_radius_mm_exact": "36",
+      "project_id": "aefd1cee8120112112c0df279f47b5e270d45473b71b99c93fc3e4582b26f158",
+      "status": "pass",
+      "result": {
+        "status": "pass",
+        "model": "convex in-line radial roller cam; 3-4-5 motion",
+        "pressure_angle_limit_deg_approx": 26.565051177077994,
+        "segments": [
+          {
+            "segment": 0,
+            "checks": {
+              "pressure": {
+                "status": "pass",
+                "boxes": 3
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 3
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          },
+          {
+            "segment": 1,
+            "checks": {
+              "pressure": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          },
+          {
+            "segment": 2,
+            "checks": {
+              "pressure": {
+                "status": "pass",
+                "boxes": 3
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 3
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          },
+          {
+            "segment": 3,
+            "checks": {
+              "pressure": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "convex_pitch": {
+                "status": "pass",
+                "boxes": 1
+              },
+              "roller_curvature": {
+                "status": "pass",
+                "boxes": 1
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "evaluated": 9,
+  "total": 9,
+  "candidate_budget": 64,
+  "check_limits": {
+    "interval_budget_per_condition": 2048,
+    "maximum_subdivision_depth": 24
+  },
+  "scope": "Declared finite radii only; geometric model, not loads, wear or manufacturing approval."
+}
